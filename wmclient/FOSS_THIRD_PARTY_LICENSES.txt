@@ -1,0 +1,23 @@
+Apache commons-collections
+Apache Software License Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0
+
+Apache commons-io
+Apache Software License Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0
+
+Apache commons-lang
+Apache Software License Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0
+
+Apache httpcomponents
+Apache Software License Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0
+
+Gson
+Apache License Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0
+
+Java Servlet API
+Java EE 6 SDK License
+http://java.sun.com/javaee/downloads/licenses/JavaEE6_SDK_SLA&Entitlement(24Oct2009).txt
