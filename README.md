@@ -1,5 +1,4 @@
 # wurfl-microservice-client-java
-# wurfl-microservice-client-java
 
 WURFL Microservice client API for Java allows easy deploy of device detection features with containerized solution that fits the evolving microservice software architecture. For further reference :
 
