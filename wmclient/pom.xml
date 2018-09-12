@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.scientiamobile.wurfl</groupId>
-    <artifactId>wmclient</artifactId>
+    <artifactId>wurfl-microservice</artifactId>
     <version>1.1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>wmclient</name>
+    <name>wurfl-microservice</name>
     <url>https://github.com/WURFL/wurfl-microservice-client-java</url>
     <description>Wurfl microservice java client API</description>
     <inceptionYear>2018</inceptionYear>
