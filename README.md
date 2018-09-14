@@ -9,6 +9,8 @@ https://aws.amazon.com/marketplace/pp/B076MHJHW7?qid=1536745296666&sr=0-3&ref_=s
 or with scientamobile docker solution :
 https://www.scientiamobile.com/products/wurfl-microservice-docker-detect-device/
 
+Maven Central repo link for wurfl-microservice-client-java : https://search.maven.org/search?q=a:wurfl-microservice 
+
 
 ```
 
