@@ -40,7 +40,7 @@ public class Example {
 
 
         try {
-            WmClient client = WmClient.create("http", "localhost", "80", "");
+            WmClient client = WmClient.create("http", "aws-host", "80", "");
             Model.JSONInfoData info = client.getInfo();
             out.println("Printing WM server information");
             out.println("WURFL API version: " + info.wurflApiVersion);
