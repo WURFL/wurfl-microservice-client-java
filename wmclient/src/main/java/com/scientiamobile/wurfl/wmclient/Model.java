@@ -1,18 +1,18 @@
-/**
- * Copyright 2018 Scientiamobile Inc.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*
+Copyright 2019 ScientiaMobile Inc. http://www.scientiamobile.com
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package com.scientiamobile.wurfl.wmclient;
 
 import com.google.gson.annotations.SerializedName;
@@ -24,38 +24,47 @@ import java.util.Map;
  */
 public class Model {
 
+    // Factory methods
+    static Request newRequest(Map<String, String> lookupHeaders, String[] requestedCaps, String[] requestedVcaps, String wurflId) {
+        return new Model().new Request(lookupHeaders, requestedCaps, requestedVcaps, wurflId);
+    }
+
+    static JSONModelMktName newJSONModelMktName(String modelName, String mktName){
+        return new Model().new JSONModelMktName(modelName, mktName);
+    }
+
     /**
-     * Holds informations about wurfl private cloud server and API
+     * Holds informations about wurfl microservice server and API
      * <p>
      * Created by Andrea Castello on 19/07/2017.
      */
     public class JSONInfoData {
 
         @SerializedName("wurfl_api_version")
-        public String wurflApiVersion;
+        String wurflApiVersion;
 
         @SerializedName("wm_version")
-        public String wmVersion;
+        String wmVersion;
 
         @SerializedName("wurfl_info")
-        public String wurflInfo;
+        String wurflInfo;
 
         @SerializedName("important_headers")
-        public String[] importantHeaders;
+         String[] importantHeaders;
 
         @SerializedName("static_caps")
-        public String[] staticCaps;
+         String[] staticCaps;
 
         @SerializedName("virtual_caps")
-        public String[] virtualCaps;
+         String[] virtualCaps;
 
         @SerializedName("ltime")
-        public String ltime;
+         String ltime;
 
         /**
          * @return Version of WURFL API used by the wm server
          */
-        public String getWurflApiVersion() {
+         public String getWurflApiVersion() {
             return wurflApiVersion;
         }
 
@@ -76,7 +85,7 @@ public class Model {
         /**
          * @return List of important headers used when detecting a device using an HTTP Request
          */
-        public String[] getImportantHeaders() {
+         String[] getImportantHeaders() {
             return importantHeaders;
         }
 
@@ -135,7 +144,7 @@ public class Model {
         @SerializedName("wurfl_id")
         private String wurflId;
 
-        public Request(Map<String, String> lookupHeaders, String[] requestedCaps, String[] requestedVcaps, String wurflId) {
+        Request(Map<String, String> lookupHeaders, String[] requestedCaps, String[] requestedVcaps, String wurflId) {
             this.lookupHeaders = lookupHeaders;
             this.requestedCaps = requestedCaps;
             this.requestedVcaps = requestedVcaps;
@@ -145,7 +154,7 @@ public class Model {
         /**
          * @return the headers used for the lookup process
          */
-        public Map<String, String> getLookupHeaders() {
+        Map<String, String> getLookupHeaders() {
             return lookupHeaders;
         }
 
@@ -166,11 +175,10 @@ public class Model {
         /**
          * @return WURFL Id of the requested device (used when calling LookupDeviceID API)
          */
-        public String getWurflId() {
+        String getWurflId() {
             return wurflId;
         }
     }
-
 
     public class JSONMakeModel {
 
@@ -184,9 +192,25 @@ public class Model {
         public String marketingName;
     }
 
-    // Factory method
-    public static Request newRequest(Map<String, String> lookupHeaders, String[] requestedCaps, String[] requestedVcaps, String wurflId) {
-        return new Model().new Request(lookupHeaders, requestedCaps, requestedVcaps, wurflId);
+    public class JSONModelMktName {
+        @SerializedName("model_name")
+        public String modelName;
+
+        @SerializedName("marketing_name")
+        public String marketingName;
+
+        public JSONModelMktName(String modelName, String marketingName) {
+            this.modelName = modelName;
+            this.marketingName = marketingName;
+        }
+    }
+
+    public  class JSONDeviceOsVersions {
+        @SerializedName("device_os")
+        public String osName;
+
+        @SerializedName("device_os_version")
+        public String osVersion;
     }
 
 }

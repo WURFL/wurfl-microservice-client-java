@@ -1,17 +1,18 @@
-/**
- * Copyright 2018 Scientiamobile Inc.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*
+Copyright 2019 ScientiaMobile Inc. http://www.scientiamobile.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package com.scientiamobile.wurfl.wmclient;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,11 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * The implementation is internally synchronized, as it is backed by a SynchronizedMap.<br>
  * Created by Andrea Castello on 11/09/2017.
  */
-public class LRUCache<K, E> {
+class LRUCache<K, E> {
 
     private final static int DEFAULT_SIZE = 20000;
     // We'll use this object to lock
-    private Object mutex;// = new Object();
+    private final Object mutex;
 
     private int size;
 
@@ -38,7 +39,7 @@ public class LRUCache<K, E> {
      *
      * @param maxSize The cache's maximum size
      */
-    public LRUCache(int maxSize) {
+    LRUCache(int maxSize) {
         if (maxSize > 0) {
             this.size = maxSize;
         } else {
@@ -51,7 +52,7 @@ public class LRUCache<K, E> {
     /**
      * Created an instance of LRUCache with the default maximum size.<br>
      */
-    public LRUCache() {
+    LRUCache() {
         this(DEFAULT_SIZE);
     }
 
@@ -61,7 +62,7 @@ public class LRUCache<K, E> {
      * @param key the cache key
      * @return the cache entry
      */
-    public E getEntry(K key) {
+    E getEntry(K key) {
         synchronized (mutex) {
             Node entry = cache.get(key);
             if (entry == null) {
@@ -77,7 +78,7 @@ public class LRUCache<K, E> {
     /**
      * Removes all elements from cache.
      */
-    public void clear() {
+    void clear() {
         synchronized (mutex) {
             cache.clear();
             head = null;
@@ -91,16 +92,12 @@ public class LRUCache<K, E> {
      * @param key   the cache key
      * @param value the value to be cached
      */
-    public void putEntry(K key, E value) {
+    void putEntry(K key, E value) {
         synchronized (mutex) {
             Node entry = cache.get(key);
 
             if (entry == null) {
                 entry = new Node(key, value);
-
-                // Internal cache has reached max size, we remove the tail element, before adding the new one which will become the head
-                //int s = size();
-                //System.out.println("Cache size :" + s + ", max size: " +  size);
                 if (size() == this.size) {
 
                     cache.remove(tail.key);
@@ -117,7 +114,7 @@ public class LRUCache<K, E> {
         }
     }
 
-    public int size() {
+    int size() {
         synchronized (mutex) {
             return cache.size();
         }
@@ -125,7 +122,6 @@ public class LRUCache<K, E> {
 
     // moves the given entry to the head of the cache
     private void moveToHead(Node entry) {
-        //synchronized (mutex) {
         if (entry == head || entry == null) return;
 
         Node next = entry.next;
@@ -142,20 +138,18 @@ public class LRUCache<K, E> {
         head = entry;
 
         if (tail == entry) tail = previous;
-        //}
     }
 
     // represents a node in the internal cache, holding references to its previous and next elements
     private class Node {
-        public Node(K key, E value) {
+        Node(K key, E value) {
             this.key = key;
             this.value = value;
         }
 
         private Node next;
         private Node previous;
-        public K key;
+        private K key;
         private E value;
     }
-
 }
