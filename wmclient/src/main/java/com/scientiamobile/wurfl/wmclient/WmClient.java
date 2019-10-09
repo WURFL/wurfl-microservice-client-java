@@ -181,37 +181,6 @@ public class WmClient {
     }
 
     /**
-     * @return An array of JSONMakeModel structures, holding brand, model and marketing name of all devices handled by WM server.
-     * @throws WmException In case a connection error occurs or malformed data are sent
-     * @deprecated since version 1.2.0.0 Use getAllDeviceMakes and getAllDevicesForMake(String make) instead
-     */
-    @Deprecated
-    public Model.JSONMakeModel[] getAllMakeModel() throws WmException {
-
-        // If makeModel cache has values we return them
-        synchronized (mkMdLock) {
-            if (this.makeModels != null && this.makeModels.length > 0) {
-                return this.makeModels;
-            }
-        }
-
-        // No cache found, let's do a server lookup
-        try {
-            final HttpGet req = new HttpGet(createUrl("/v2/alldevices/json"));
-            Class<Model.JSONMakeModel[]> type = Model.JSONMakeModel[].class;
-            Model.JSONMakeModel[] localMakeModels = _internalClient.execute(req, new WmDataHandler<Model.JSONMakeModel[]>(type));
-            synchronized (mkMdLock) {
-                if (this.makeModels == null || this.makeModels.length == 0) {
-                    this.makeModels = localMakeModels;
-                }
-            }
-            return localMakeModels;
-        } catch (IOException e) {
-            throw new WmException("An error occurred getting all devices " + e.getMessage(), e);
-        }
-    }
-
-    /**
      * @return GetAllDeviceMakes returns a string array of all devices brand_name capabilities in WM server
      * @throws WmException In case a connection error occurs or malformed data are sent
      */

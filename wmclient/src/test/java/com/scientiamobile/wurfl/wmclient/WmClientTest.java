@@ -414,31 +414,6 @@ public class WmClientTest {
     }
 
     @Test
-    public void getAllMakeModelTest() throws Exception {
-        WmClient client = createTestCachedClient(1000);
-        Model.JSONMakeModel[] makeModels = client.getAllMakeModel();
-        Assert.assertNotNull(makeModels);
-        Assert.assertTrue(makeModels.length >= 20000);
-        Assert.assertNotNull(makeModels[0].brandName);
-        Assert.assertNotNull(makeModels[0].modelName);
-        // This checks that makeModels has been assigned to cached value
-        Assert.assertTrue(client.makeModels.length >= 20000);
-
-        boolean hasMarketingName = false;
-        for (Model.JSONMakeModel mkmd : makeModels) {
-            if (mkmd.marketingName != null) {
-                hasMarketingName = true;
-                break;
-            }
-        }
-        Assert.assertTrue(hasMarketingName);
-        // This calls private method (unit test mode only)
-        invokeClearCacheIfNeeded(client, "2199-12-31");
-        Assert.assertEquals(client.makeModels.length, 0);
-        client.destroyConnection();
-    }
-
-    @Test
     public void getAllDeviceMakesTest() throws Exception {
 
         WmClient client = createTestCachedClient(1000);

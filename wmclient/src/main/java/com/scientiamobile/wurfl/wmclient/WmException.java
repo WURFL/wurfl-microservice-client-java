@@ -16,7 +16,7 @@ limitations under the License.
 package com.scientiamobile.wurfl.wmclient;
 
 /**
- * WmException is a general purpose exception throws whenever an unrecoverable error occurs during device detection (ie: no connection available to WM server,
+ * WmException is a general purpose exception thrown whenever an unrecoverable error occurs during device detection (ie: no connection available to WM server,
  * wrong url or port configurations, etc.
  */
 public class WmException extends Exception {
