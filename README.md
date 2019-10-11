@@ -1,13 +1,12 @@
 # ScientiaMobile WURFL Microservice Client for Java
 
-WURFL Microservice client API for Java allows easy deploy of device detection features with containerized solution that fits the evolving microservice software architecture. For further reference :
+WURFL Microservice (by ScientiaMobile, Inc.) is a mobile device detection service that can quickly and accurately detect over 500 capabilities of visiting devices. It can differentiate between portable mobile devices, desktop devices, SmartTVs and any other types of devices that have a web browser.
 
-https://www.scientiamobile.com/products/wurfl-device-detection-microservice-aws/
+This is the Java Client API for accessing the WURFL Microservice. The API is released under Open-Source and can be integrated with other open-source or proprietary code. In order to operate, it requires access to a running instance of the WURFL Microservice product, such as:
 
-To run the following example you will need a WURFL microservice server running either on AWS-EC2 :
-https://aws.amazon.com/marketplace/pp/B076MHJHW7?qid=1536745296666&sr=0-3&ref_=srh_res_product_title&cl_spe=C
-or with scientamobile docker solution :
-https://www.scientiamobile.com/products/wurfl-microservice-docker-detect-device/
+- WURFL Microservice for Docker: https://www.scientiamobile.com/products/wurfl-microservice-docker-detect-device/
+
+- WURFL Microservice for AWS: https://www.scientiamobile.com/products/wurfl-device-detection-microservice-aws/ 
 
 Maven Central repo link for wurfl-microservice-client-java : https://search.maven.org/search?q=a:wurfl-microservice 
 
