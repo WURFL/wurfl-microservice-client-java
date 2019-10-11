@@ -1,17 +1,18 @@
-/**
- * Copyright 2018 Scientiamobile Inc.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*
+Copyright 2019 ScientiaMobile Inc. http://www.scientiamobile.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package com.scientiamobile.wurfl.wmclient;
 
 import com.google.gson.Gson;
@@ -50,7 +51,6 @@ public class WmClient {
 
     private final static String DEVICE_ID_CACHE_TYPE = "dId-cache";
     private final static String USERAGENT_CACHE_TYPE = "ua-cache";
-    private static final String CLIENT_TOKEN_HEADER = "X-Md5-Signature";
 
     private String scheme;
     private String host;
@@ -74,13 +74,23 @@ public class WmClient {
     // Time of last WURFL.xml file load on server
     private String ltime;
 
-    // Token sent to server for API permission check
-    private String clientToken;
-
     // Stores the result of time consuming call getAllMakeModel
-    public Model.JSONMakeModel[] makeModels = new Model.JSONMakeModel[0];
+    Model.JSONMakeModel[] makeModels = new Model.JSONMakeModel[0];
     // Lock object used for MakeModel safety
     private final Object mkMdLock = new Object();
+
+    // List of device manufacturers
+    private String[] deviceMakes = new String[0];
+    // Lock object used for deviceMakes safety
+    private final Object deviceMakesLock = new Object();
+    // Map that associates brand name to JSONModelMktName objects
+    private Map<String, List<Model.JSONModelMktName>> deviceMakesMap = new HashMap<String, List<Model.JSONModelMktName>>();
+    // Map that associates os name to JSONDeviceOsVersions objects
+    private Map<String, List<String>> deviceOsVersionsMap = new HashMap<String, List<String>>();
+    // List of all device OSes
+    private String[] deviceOSes = new String[0];
+    // Lock object user for deviceOSes safety
+    private final Object deviceOSesLock = new Object();
 
     // internal http client
     private CloseableHttpClient _internalClient;
@@ -116,9 +126,10 @@ public class WmClient {
 
     /**
      * Creates an instance of a WURFL Microservice client
-     * @param scheme protocol scheme
-     * @param host host of the WM server
-     * @param port port of the WM server
+     *
+     * @param scheme  protocol scheme
+     * @param host    host of the WM server
+     * @param port    port of the WM server
      * @param baseURI any base URI which must be added after the host (NOT including the endpoints, which are handled by the client).
      *                This may be useful, for example, with thrird parties VMs (like docker or AWS). Leave empty or null if not needed.
      * @return The instance of the WM client
@@ -128,13 +139,8 @@ public class WmClient {
 
         try {
             WmClient client = new WmClient(scheme, host, port, baseURI);
-            client.createMD5Token();
             // Test server connection and save important headers taken using getInfo function
             Model.JSONInfoData info = client.getInfo();
-
-            if (!checkData(info)) {
-                throw new WmException("Error getting data from WM server : client not authorized");
-            }
 
             client.importantHeaders = info.getImportantHeaders();
             client.staticCaps = info.getStaticCaps();
@@ -149,7 +155,7 @@ public class WmClient {
     }
 
     private static boolean checkData(Model.JSONInfoData info) {
-        // If these are empty there's something wrong
+        // If these are empty there's something wrong, like server returning a json error message or a different data format
         return StringUtils.isNotEmpty(info.getWmVersion()) && StringUtils.isNotEmpty(info.getWurflApiVersion()) && StringUtils.isNotEmpty(info.getWurflInfo())
                 && (ArrayUtils.isNotEmpty(info.getStaticCaps()) || ArrayUtils.isNotEmpty(info.getVirtualCaps()));
     }
@@ -161,9 +167,11 @@ public class WmClient {
     public Model.JSONInfoData getInfo() throws WmException {
         try {
             final HttpGet req = new HttpGet(createUrl("/v2/getinfo/json"));
-            req.addHeader(CLIENT_TOKEN_HEADER, this.clientToken);
             Class<Model.JSONInfoData> type = Model.JSONInfoData.class;
             Model.JSONInfoData info = _internalClient.execute(req, new WmDataHandler<Model.JSONInfoData>(type));
+            if (!(checkData(info))) {
+                throw new WmException("Server returned empty data or a wrong json format");
+            }
             // Check if cache must be cleared
             clearCachesIfNeeded(info.ltime);
             return info;
@@ -173,37 +181,140 @@ public class WmClient {
     }
 
     /**
-     * @return An array of JSONMakeModel structures, holding brand, model and marketing name of all devices handled by WM server.
+     * @return GetAllDeviceMakes returns a string array of all devices brand_name capabilities in WM server
      * @throws WmException In case a connection error occurs or malformed data are sent
      */
-    public Model.JSONMakeModel[] getAllMakeModel() throws WmException {
+    public String[] getAllDeviceMakes() throws WmException {
 
-        // If makeModel cache has values we return them
-        synchronized (mkMdLock) {
-            if (this.makeModels != null && this.makeModels.length > 0) {
-                return this.makeModels;
+        loadDeviceMakesData();
+        return deviceMakes;
+    }
+
+    /**
+     * @param make a brand name
+     * @return An array of {@link com.scientiamobile.wurfl.wmclient.Model.JSONModelMktName} that contain values for model_name
+     * and marketing_name (the latter, if available).
+     * @throws WmException In case a connection error occurs, malformed data are sent, or the given brand name parameter does not exist in WM server.
+     */
+    public Model.JSONModelMktName[] getAllDevicesForMake(String make) throws WmException {
+        loadDeviceMakesData();
+
+        if (deviceMakesMap.containsKey(make)) {
+            List<Model.JSONModelMktName> mdMks = deviceMakesMap.get(make);
+            // It is counterintuitive, but providing a zero length array is faster than providing a fixed size one with Java 6+
+            return mdMks.toArray(new Model.JSONModelMktName[0]);
+        } else {
+            throw new WmException(String.format("Error getting data from WM server: %s does not exist", make));
+        }
+
+    }
+
+    /**
+     * @return an array of all devices device_os capabilities in WM server
+     * @throws WmException In case a connection error occurs or malformed data are sent
+     */
+    public String[] getAllOSes() throws WmException {
+        loadDeviceOsesData();
+        return deviceOSes;
+    }
+
+    private void loadDeviceOsesData() throws WmException {
+        synchronized (deviceOSesLock) {
+            if (deviceOSes != null && deviceOSes.length > 0) {
+                return;
             }
         }
 
-        // No cache found, let's do a server lookup
         try {
-            final HttpGet req = new HttpGet(createUrl("/v2/alldevices/json"));
-            req.addHeader(CLIENT_TOKEN_HEADER, this.clientToken);
-            Class<Model.JSONMakeModel[]> type = Model.JSONMakeModel[].class;
-            Model.JSONMakeModel[] localMakeModels = _internalClient.execute(req, new WmDataHandler<Model.JSONMakeModel[]>(type));
-            synchronized (mkMdLock) {
-                if (this.makeModels == null || this.makeModels.length == 0) {
-                    this.makeModels = localMakeModels;
+            final HttpGet req = new HttpGet(createUrl("/v2/alldeviceosversions/json"));
+            Class<Model.JSONDeviceOsVersions[]> type = Model.JSONDeviceOsVersions[].class;
+            Model.JSONDeviceOsVersions[] localOSes = _internalClient.execute(req, new WmDataHandler<Model.JSONDeviceOsVersions[]>(type));
+
+            Map<String, List<String>> dmMap = new HashMap<String, List<String>>();
+            Set<String> devOSes = new HashSet<String>();
+            for (Model.JSONDeviceOsVersions osVer : localOSes) {
+                devOSes.add(osVer.osName);
+
+                if (!dmMap.containsKey(osVer.osName)) {
+                    dmMap.put(osVer.osName, new ArrayList<String>());
+                }
+                dmMap.get(osVer.osName).add(osVer.osVersion);
+            }
+            synchronized (deviceOSesLock) {
+                deviceOSes = devOSes.toArray(new String[0]);
+                deviceOsVersionsMap = dmMap;
+            }
+
+        } catch (IOException e) {
+            throw new WmException("An error occurred getting device os name and version data " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * returns a slice
+     *
+     * @param osName a device OS name
+     * @return an array containing device_os_version for the given os_name
+     * @throws
+     */
+    public String[] getAllVersionsForOS(String osName) throws WmException {
+        loadDeviceOsesData();
+        if (deviceOsVersionsMap.containsKey(osName)) {
+            List<String> osVers = deviceOsVersionsMap.get(osName);
+            Iterator<String> it = osVers.iterator();
+            while (it.hasNext()) {
+                if ("".equals(it.next())) {
+                    it.remove();
                 }
             }
-            return localMakeModels;
+            return osVers.toArray(new String[0]);
+        } else {
+            throw new WmException(String.format("Error getting data from WM server: %s does not exist", osName));
+        }
+    }
+
+    private void loadDeviceMakesData() throws WmException {
+
+        // If deviceMakes cache has values everything has already been loaded, thus we exit
+        synchronized (deviceMakesLock) {
+            if (this.deviceMakes != null && this.deviceMakes.length > 0) {
+                return;
+            }
+        }
+
+        // No values already loaded, let's do it.
+        try {
+            final HttpGet req = new HttpGet(createUrl("/v2/alldevices/json"));
+            Class<Model.JSONMakeModel[]> type = Model.JSONMakeModel[].class;
+            Model.JSONMakeModel[] localMakeModels = _internalClient.execute(req, new WmDataHandler<Model.JSONMakeModel[]>(type));
+
+            Map<String, List<Model.JSONModelMktName>> dmMap = new HashMap<String, List<Model.JSONModelMktName>>();
+            Set<String> devMakes = new HashSet<String>();
+            for (Model.JSONMakeModel mkModel : localMakeModels) {
+                if (!dmMap.containsKey(mkModel.brandName)) {
+                    devMakes.add(mkModel.brandName);
+                }
+
+                List<Model.JSONModelMktName> mdMkNames = dmMap.get(mkModel.brandName);
+                if (mdMkNames == null) {
+                    mdMkNames = new ArrayList<Model.JSONModelMktName>();
+                    dmMap.put(mkModel.brandName, mdMkNames);
+                }
+                mdMkNames.add(Model.newJSONModelMktName(mkModel.modelName, mkModel.marketingName));
+            }
+
+            synchronized (deviceMakesLock) {
+                this.deviceMakesMap = dmMap;
+                this.deviceMakes = devMakes.toArray(new String[0]);
+            }
         } catch (IOException e) {
-            throw new WmException("An error occurred gettin all devices " + e.getMessage(), e);
+            throw new WmException("An error occurred getting makes and model data " + e.getMessage(), e);
         }
     }
 
     /**
      * Performs a device detection against a user agent header
+     *
      * @param useragent a user agent header
      * @return An object containing the device capabilities
      * @throws WmException In case any error occurs during device detection
@@ -218,6 +329,7 @@ public class WmClient {
 
     /**
      * Returns the device matching the given WURFL ID
+     *
      * @param wurflId a WURFL device identifier
      * @return An object containing the device capabilities
      * @throws WmException In case any error occurs
@@ -230,6 +342,7 @@ public class WmClient {
 
     /**
      * Performs a device detection using an HTTP request object, as passed from Java Web applications
+     *
      * @param httpRequest an instance of HTTPServletRequest
      * @return An object containing the device capabilities
      * @throws WmException In case any error occurs during device detection
@@ -267,7 +380,7 @@ public class WmClient {
                 stCaps.add(name);
             }
         }
-        this.requestedStaticCaps = stCaps.toArray(new String[stCaps.size()]);
+        this.requestedStaticCaps = stCaps.toArray(new String[0]);
         clearCaches();
     }
 
@@ -285,12 +398,11 @@ public class WmClient {
                 vCaps.add(name);
             }
         }
-        this.requestedVirtualCaps = vCaps.toArray(new String[vCaps.size()]);
+        this.requestedVirtualCaps = vCaps.toArray(new String[0]);
         clearCaches();
     }
 
     /**
-     *
      * @param capName capability name
      * @return true if the given static capability is handled by this client, false otherwise
      */
@@ -325,11 +437,11 @@ public class WmClient {
             }
         }
         if (CollectionUtils.isNotEmpty(capNames)) {
-            this.requestedStaticCaps = capNames.toArray(new String[capNames.size()]);
+            this.requestedStaticCaps = capNames.toArray(new String[0]);
         }
 
         if (CollectionUtils.isNotEmpty(vcapNames)) {
-            this.requestedVirtualCaps = vcapNames.toArray(new String[vcapNames.size()]);
+            this.requestedVirtualCaps = vcapNames.toArray(new String[0]);
         }
         clearCaches();
     }
@@ -337,6 +449,7 @@ public class WmClient {
     /**
      * Deallocates all resources used by client. All subsequent usage of client will result in a WmException (you need to create the client again
      * with a call to WmClient.create().
+     *
      * @throws WmException In case of closing connection errors.
      */
     public void destroyConnection() throws WmException {
@@ -345,6 +458,10 @@ public class WmClient {
             uaCache = null;
             devIDCache = null;
             makeModels = null;
+            deviceMakesMap = null;
+            deviceMakes = null;
+            deviceOsVersionsMap = null;
+            deviceOSes = null;
             _internalClient.close();
         } catch (IOException e) {
             throw new WmException("Unable to close client: " + e.getMessage(), e);
@@ -404,7 +521,6 @@ public class WmClient {
                 ContentType.APPLICATION_JSON);
 
         HttpPost postMethod = new HttpPost(createUrl(path));
-        postMethod.addHeader(CLIENT_TOKEN_HEADER, this.clientToken);
         postMethod.setEntity(requestEntity);
 
         Class<Model.JSONDeviceData> type = Model.JSONDeviceData.class;
@@ -417,9 +533,9 @@ public class WmClient {
             // Check if caches must be cleared before adding a new device
             clearCachesIfNeeded(device.ltime);
             if (cacheType != null) {
-                if (cacheType.equals(USERAGENT_CACHE_TYPE) && devIDCache != null && !cacheKey.equals("")) {
+                if (cacheType.equals(USERAGENT_CACHE_TYPE) && devIDCache != null && !"".equals(cacheKey)) {
                     safePutDevice(uaCache, cacheKey, device);
-                } else if (cacheType.equals(DEVICE_ID_CACHE_TYPE) && uaCache != null && !cacheKey.equals("")) {
+                } else if (cacheType.equals(DEVICE_ID_CACHE_TYPE) && uaCache != null && !"".equals(cacheKey)) {
                     safePutDevice(devIDCache, cacheKey, device);
                 }
             }
@@ -431,6 +547,7 @@ public class WmClient {
 
     /**
      * Sets the client cache size
+     *
      * @param uaMaxEntries maximum cache dimension
      */
     public void setCacheSize(int uaMaxEntries) {
@@ -442,7 +559,7 @@ public class WmClient {
      * @return This client API version
      */
     public String getApiVersion() {
-        return "1.1.0.0";
+        return "2.0.0";
     }
 
     private void clearCaches() {
@@ -455,6 +572,14 @@ public class WmClient {
         }
 
         makeModels = new Model.JSONMakeModel[0];
+        deviceMakes = new String[0];
+        deviceMakesMap = new HashMap<String, List<Model.JSONModelMktName>>();
+
+
+        synchronized (deviceOSesLock) {
+            deviceOSes = new String[0];
+            deviceOsVersionsMap = new HashMap<String, List<String>>();
+        }
     }
 
 
@@ -501,31 +626,13 @@ public class WmClient {
 
         return csize;
     }
-
-    private void createMD5Token() throws WmException {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            Date now = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            String strDate = sdf.format(now);
-            md.update(strDate.getBytes("UTF-8"), 0, strDate.length());
-            String s = new BigInteger(1, md.digest()).toString(16);
-            StringBuilder b = new StringBuilder(s);
-            b.replace(11, 12, "0");
-            b.replace(17, 18, "4");
-            this.clientToken = b.toString();
-        } catch (Exception e) {
-            throw new WmException("An error occurred generating MD5 token", e);
-        }
-
-    }
 }
 
 class WmDataHandler<T> implements ResponseHandler<T> {
 
     private Class<T> type;
 
-    public WmDataHandler(Class<T> type) {
+    WmDataHandler(Class<T> type) {
         this.type = type;
     }
 

@@ -1,17 +1,18 @@
-/**
- * Copyright 2018 Scientiamobile Inc.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*
+Copyright 2019 ScientiaMobile Inc. http://www.scientiamobile.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package com.scientiamobile.wurfl.wmclient;
 
 import org.testng.Assert;
@@ -21,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
@@ -32,7 +34,7 @@ public class LRUCacheTest {
 
     @Test
     public void multithreadAddAndCheckTest() throws Exception {
-        LRUCache<String, Object> cache = new LRUCache<String, Object>(100);
+        LRUCache<String, Object> cache = new LRUCache<String, Object>(1000);
         List<CallableTestTask<Boolean>> tasks = createAddAndCheckTasks(32, cache);
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(32);
         List<Future<Boolean>> futures = executorService.invokeAll(tasks, 5, TimeUnit.MINUTES);
@@ -59,7 +61,7 @@ public class LRUCacheTest {
 
     @Test
     public void multithreadGetAndClearCacheTest() throws Exception {
-        LRUCache<String, Object> cache = new LRUCache<String, Object>(100);
+        LRUCache<String, Object> cache = new LRUCache<String, Object>(1000);
         List<CallableTestTask<Boolean>> tasks = createGetClearOrPutTasks(32, cache);
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(32);
         List<Future<Boolean>> futures = executorService.invokeAll(tasks, 5, TimeUnit.MINUTES);
@@ -144,29 +146,19 @@ public class LRUCacheTest {
     }
 
     private List<CallableTestTask<Boolean>> createAddAndCheckTasks(int numTasks, final LRUCache<String, Object> cache) {
+        final String[] userAgentList = TestData.createTestUserAgentList();
         List<CallableTestTask<Boolean>> tasks = new ArrayList<CallableTestTask<Boolean>>(numTasks);
         for (int i = 0; i < numTasks; i++) {
             final int tindex = i;
-            tasks.add(new CallableTestTask<Boolean>(i, "ua.txt") {
+            tasks.add(new CallableTestTask<Boolean>(i, userAgentList) {
                 @Override
                 public Boolean call() throws Exception {
                     System.out.println("Starting task#: " + tindex);
                     try {
-                        InputStreamReader reader = new InputStreamReader(new FileInputStream("ua.txt"));
-                        BufferedReader br = new BufferedReader(reader);
-                        String line;
-                        readLines = 0;
-                        while ((line = br.readLine()) != null) {
+                        for (String line : userAgentList) {
                             cache.putEntry(line, new Object());
                             Object val = cache.getEntry(line);
-
-                            // While the test seem to pass, there is no guarantee that one or more threads can call the putEntry before het is called,
-                            // thus removing the element inserted by current thread
-                            /**
-                             if (val == null) {
-                             System.out.println("task # " + tindex + " value for inserted key: " + line + " is null ");
-                             }
-                             Assert.assertTrue(val != null);*/
+                            Assert.assertNotNull(val);
                             readLines++;
                         }
                         System.out.println("Lines read from terminated task #" + tindex + ": " + readLines);
@@ -184,25 +176,23 @@ public class LRUCacheTest {
 
     private List<CallableTestTask<Boolean>> createGetClearOrPutTasks(int numTasks, final LRUCache<String, Object> cache) {
         List<CallableTestTask<Boolean>> tasks = new ArrayList<CallableTestTask<Boolean>>(numTasks);
+        final String[] userAgentList = TestData.createTestUserAgentList();
         for (int i = 0; i < numTasks; i++) {
             final int tindex = i;
-            tasks.add(new CallableTestTask<Boolean>(i, "ua.txt") {
+            tasks.add(new CallableTestTask<Boolean>(i, userAgentList) {
                 @Override
                 public Boolean call() throws Exception {
                     System.out.println("Starting task#: " + tindex);
                     try {
                         readLines = 0;
-                        InputStreamReader reader = new InputStreamReader(new FileInputStream("ua.txt"));
-                        BufferedReader br = new BufferedReader(reader);
-                        String line;
-                        while ((line = br.readLine()) != null) {
+                        for (String line : userAgentList) {
 
                             cache.getEntry(line);
-                            // every 3K detections and only on even threads we clear cache to check it does not
+                            // every 300 detections and only on even threads we clear cache to check it does not
                             readLines++;
 
-                            // every 3000K and only on even threads, we clear cache, to see if getEntry handles it without raising errors
-                            if (readLines % 3000 == 0 && tindex % 2 == 0) {
+                            // every 300 and only on even threads, we clear cache, to see if getEntry handles it without raising errors
+                            if (readLines % 300 == 0 && tindex % 2 == 0) {
                                 cache.clear();
                             } else if (tindex % 2 != 0) {
                                 cache.putEntry(line, new Object());
@@ -221,16 +211,16 @@ public class LRUCacheTest {
         }
         return tasks;
     }
-}
 
-abstract class CallableTestTask<V> implements Callable<V> {
-    int taskIndex;
-    String uaFile;
-    boolean success = false;
-    int readLines;
+    abstract class CallableTestTask<V> implements Callable<V> {
+        int taskIndex;
+        String[] userAgents;
+        boolean success = false;
+        int readLines;
 
-    public CallableTestTask(int taskIndex, String uaFile) {
-        this.taskIndex = taskIndex;
-        this.uaFile = uaFile;
+        public CallableTestTask(int taskIndex, String[] userAgents) {
+            this.taskIndex = taskIndex;
+            this.userAgents = userAgents;
+        }
     }
 }
