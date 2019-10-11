@@ -1,4 +1,4 @@
-# wurfl-microservice-client-java
+# ScientiaMobile WURFL Microservice Client for Java
 
 WURFL Microservice client API for Java allows easy deploy of device detection features with containerized solution that fits the evolving microservice software architecture. For further reference :
 
