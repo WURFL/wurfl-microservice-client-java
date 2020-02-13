@@ -18,6 +18,7 @@ package com.scientiamobile.wurfl.wmclient;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.iterators.EmptyIterator;
 import org.apache.commons.collections.iterators.IteratorEnumeration;
+import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -50,12 +51,32 @@ public class WmClientTest {
 
     @BeforeClass
     public void createTestClient() throws WmException {
-        _client = WmClient.create("http", "localhost", "8080", "");
+        String host = "localhost";
+        String port = "8080";
+        String envHost = System.getenv("WM_HOST");
+        String envPort = System.getenv("WM_PORT");
+        if (StringUtils.isNotEmpty(envHost)){
+            host = envHost;
+        }
+        if(StringUtils.isNotEmpty(envPort)){
+            port = envPort;
+        }
+        _client = WmClient.create("http", host, port, "");
     }
 
 
     public WmClient createCachedTestClient(int csize) throws WmException {
-        WmClient cl = WmClient.create("http", "localhost", "8080", "");
+        String host = "localhost";
+        String port = "8080";
+        String envHost = System.getenv("WM_HOST");
+        String envPort = System.getenv("WM_PORT");
+        if (StringUtils.isNotEmpty(envHost)){
+            host = envHost;
+        }
+        if(StringUtils.isNotEmpty(envPort)){
+            port = envPort;
+        }
+        WmClient cl = WmClient.create("http", host, port, "");
         cl.setCacheSize(csize);
         return cl;
     }
@@ -63,7 +84,17 @@ public class WmClientTest {
 
     @Test
     public void createOkTest() throws WmException {
-        WmClient client = WmClient.create("http", "localhost", "8080", "");
+        String host = "localhost";
+        String port = "8080";
+        String envHost = System.getenv("WM_HOST");
+        String envPort = System.getenv("WM_PORT");
+        if (StringUtils.isNotEmpty(envHost)){
+            host = envHost;
+        }
+        if(StringUtils.isNotEmpty(envPort)){
+            port = envPort;
+        }
+        WmClient client = WmClient.create("http", host, port, "");
         assertNotNull(client);
         assertTrue(client.getImportantHeaders().length > 0);
         assertTrue(client.getVirtualCaps().length > 0);
@@ -103,7 +134,7 @@ public class WmClientTest {
         assertNotNull(device);
         Map<String, String> capabilities = device.capabilities;
         int dcount = capabilities.size();
-        assertTrue( dcount >= 43);
+        assertTrue( dcount >= 40);
 
         assertEquals(capabilities.get("model_name"), "SM-G950F");
         assertEquals("false", capabilities.get("is_app"));
@@ -112,7 +143,7 @@ public class WmClientTest {
 
     @Test
     public void lookupUserAgentWithSpecificCapsTest() throws WmException {
-        String[] reqCaps = {"brand_name", "model_name", "is_wireless_device", "pointing_method", "is_android", "is_ios", "is_app"};
+        String[] reqCaps = {"brand_name", "model_name", "max_image_width", "model_extra_info", "is_android", "is_ios", "is_app"};
 
         _client.setRequestedCapabilities(reqCaps);
         String ua = "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
@@ -122,7 +153,7 @@ public class WmClientTest {
         assertNotNull(capabilities);
         assertEquals("Nintendo", capabilities.get("brand_name"));
         assertEquals("Switch", capabilities.get("model_name"));
-        assertEquals("touchscreen", capabilities.get("pointing_method"));
+        assertEquals("false", capabilities.get("is_android"));
         assertEquals(8, capabilities.size());
         _client.setRequestedCapabilities(null);
     }
@@ -132,25 +163,24 @@ public class WmClientTest {
 
         boolean exc = false;
         try {
-            _client.lookupUseragent("");
+            Model.JSONDeviceData device = _client.lookupUseragent("");
+            assertNotNull(device);
+            assertEquals(device.capabilities.get("wurfl_id"), "generic");
         } catch (WmException e) {
-            exc = true;
-            assertTrue(e.getMessage().contains("No User-Agent"));
+            fail(e.getMessage());
         }
-        assertTrue(exc);
-
     }
 
     @Test
     public void testLookupUseragentNullUa() {
         boolean exc = false;
         try {
-            _client.lookupUseragent(null);
+            Model.JSONDeviceData device = _client.lookupUseragent(null);
+            assertNotNull(device);
+            assertEquals(device.capabilities.get("wurfl_id"), "generic");
         } catch (WmException e) {
-            exc = true;
-            assertTrue(e.getMessage().contains("No User-Agent"));
+            fail(e.getMessage());
         }
-        assertTrue(exc);
     }
 
     @Test
@@ -160,14 +190,14 @@ public class WmClientTest {
         Map<String, String> capabilities = device.capabilities;
         assertNotNull(capabilities);
         // num caps + num vcaps + wurfl id
-        assertTrue(capabilities.size() >= 43);
-        assertEquals("1", capabilities.get("xhtml_support_level"));
+        assertTrue(capabilities.size() >= 40);
+        assertEquals("false", capabilities.get("is_android"));
         assertEquals("128", capabilities.get("resolution_width"));
     }
 
     @Test
     public void lookupDeviceIdWithSpecificCaps() throws WmException {
-        String[] reqCaps = {"brand_name", "is_wireless_device"};
+        String[] reqCaps = {"brand_name", "is_smarttv"};
         String[] reqvCaps = {"is_app", "is_app_webview"};
         _client.setRequestedStaticCapabilities(reqCaps);
         _client.setRequestedVirtualCapabilities(reqvCaps);
@@ -176,7 +206,7 @@ public class WmClientTest {
         Map<String, String> capabilities = device.capabilities;
         assertNotNull(capabilities);
         assertEquals("Opera", capabilities.get("brand_name"));
-        assertEquals("true", capabilities.get("is_wireless_device"));
+        assertEquals("false", capabilities.get("is_smarttv"));
         assertEquals(5, capabilities.size());
     }
 
@@ -226,9 +256,9 @@ public class WmClientTest {
         assertNotNull(device);
         Map<String, String> capabilities = device.capabilities;
         assertNotNull(capabilities);
-        assertTrue(capabilities.size() >= 43);
-        assertEquals("Stock Browser", capabilities.get("advertised_app_name"));
-        assertEquals("Nintendo Browser", capabilities.get("advertised_browser"));
+        assertTrue(capabilities.size() >= 40);
+        assertEquals("Smart-TV", capabilities.get("form_factor"));
+        assertEquals("5.1.0.13341", capabilities.get("advertised_browser_version"));
         assertEquals("false", capabilities.get("is_app"));
         assertEquals("false", capabilities.get("is_app_webview"));
         assertEquals("Nintendo", capabilities.get("advertised_device_os"));
@@ -239,7 +269,8 @@ public class WmClientTest {
     @Test
     public void lookupRequestOkWithSpecificCaps() throws WmException {
 
-        String[] reqCaps = {"advertised_app_name", "advertised_browser", "is_app", "complete_device_name", "advertised_device_os", "brand_name"};
+        String[] reqCaps = {"is_mobile", "form_factor", "is_app", "complete_device_name",
+                "advertised_device_os", "brand_name"};
         _client.setRequestedCapabilities(reqCaps);
         Model.JSONDeviceData device = _client.lookupRequest(createTestRequest(true));
         Map<String, String> capabilities = device.capabilities;
@@ -262,13 +293,13 @@ public class WmClientTest {
             _client.setRequestedCapabilities(reqCaps);
             // Create request to pass
             Model.JSONDeviceData device = _client.lookupRequest(createTestRequest(false));
+            assertNotNull(device);
+            assertEquals(device.capabilities.get("wurfl_id"), "generic");
         } catch (WmException e) {
-            exc = true;
-            assertTrue(e.getMessage().contains("No User-Agent"));
+            fail(e.getMessage());
         } finally {
             _client.setRequestedCapabilities(null);
         }
-        assertTrue(exc);
 
     }
 
@@ -299,7 +330,7 @@ public class WmClientTest {
         assertNotNull(_client);
         assertTrue(_client.hasStaticCapability("brand_name"));
         assertTrue(_client.hasStaticCapability("model_name"));
-        assertTrue(_client.hasStaticCapability("is_wireless_device"));
+        assertTrue(_client.hasStaticCapability("is_smarttv"));
         // this is a virtual capability, so it shouldn't be returned
         assertFalse(_client.hasStaticCapability("is_app"));
     }
@@ -328,8 +359,8 @@ public class WmClientTest {
             Assert.assertNotNull(did);
 
             Assert.assertEquals("Nintendo", did.get("brand_name"));
-            Assert.assertEquals("touchscreen", did.get("pointing_method"));
-            Assert.assertTrue(did.size() >= 43);
+            Assert.assertEquals("true", did.get("is_mobile"));
+            Assert.assertTrue(did.size() >= 40);
 
             int[] cSize = client.getActualCacheSizes();
 
@@ -391,7 +422,7 @@ public class WmClientTest {
         client.setRequestedVirtualCapabilities(null);
         d = client.lookupUseragent(ua);
         int capsize = d.capabilities.size();
-        Assert.assertTrue(capsize >= 43);
+        Assert.assertTrue(capsize >= 40);
         client.destroyConnection();
     }
 
@@ -568,7 +599,17 @@ public class WmClientTest {
 
     // Creates a test client with a cache of the given size.
     public WmClient createTestCachedClient(int csize) throws WmException {
-        WmClient client = WmClient.create("http", "localhost", "8080", "");
+        String host = "localhost";
+        String port = "8080";
+        String envHost = System.getenv("WM_HOST");
+        String envPort = System.getenv("WM_PORT");
+        if (StringUtils.isNotEmpty(envHost)){
+            host = envHost;
+        }
+        if(StringUtils.isNotEmpty(envPort)){
+            port = envPort;
+        }
+        WmClient client = WmClient.create("http", host, port, "");
         client.setCacheSize(csize);
         Assert.assertNotNull(client);
         return client;
