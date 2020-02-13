@@ -1,21 +1,24 @@
 /*
-    Copyright 2018 Scientiamobile Inc.
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+Copyright 2020 ScientiaMobile Inc. http://www.scientiamobile.com
 
-    http://www.apache.org/licenses/LICENSE-2.0
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
- */
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package com.scientiamobile.wmclient.example;
 
 import com.scientiamobile.wurfl.wmclient.*;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -23,20 +26,22 @@ import static java.lang.System.out;
 
 public class Example {
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
 
 
         try {
-            WmClient client = WmClient.create("http", "localhost", "80", "");
+            // First we need to create a WM client instance, to connect to our WM server API at the specified host and port.
+            WmClient client = WmClient.create("http", "localhost", "8080", "");
+            // We ask Wm server API for some Wm server info such as server API version and info about WURFL API and file used by WM server.
             Model.JSONInfoData info = client.getInfo();
             out.println("Printing WM server information");
-            out.println("WURFL API version: " + info.wurflApiVersion);
-            out.println("WM server version:  " + info.wmVersion);
-            out.println("Wurfl file info: " + info.wurflInfo);
-
+            out.println("WURFL API version: " + info.getWurflApiVersion());
+            out.println("WM server version:  " + info.getWmVersion());
+            out.println("Wurfl file info: " + info.getWurflInfo());
 
             String ua = "Mozilla/5.0 (Linux; Android 7.1.1; ONEPLUS A5000 Build/NMF26X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Mobile Safari/537.36";
 
+            // By setting the cache size we are also activating the caching option in WM client. In order to not use cache, you just to need to omit setCacheSize call
             client.setCacheSize(100000);
 
             // set the capabilities we want to receive from WM server
@@ -46,32 +51,99 @@ public class Example {
             out.println();
             out.println("Detecting device for user-agent: " + ua);
 
+            // Perform a device detection calling WM server API
             Model.JSONDeviceData device = client.lookupUseragent(ua);
             // Applicative error, ie: invalid input provided
             if (device.error != null && device.error.length() > 0) {
                 out.println("An error occurred: " + device.error);
             } else {
-                Map<String,String> capabilities = device.capabilities;
+                // Let's get the device capabilities and print some of them
+                Map<String, String> capabilities = device.capabilities;
                 out.println("Detected device WURFL ID: " + capabilities.get("wurfl_id"));
                 out.println("Device brand & model: " + capabilities.get("brand_name") + " " + capabilities.get("model_name"));
                 out.println("Detected device form factor: " + capabilities.get("form_factor"));
-                if(capabilities.get("is_smartphone").equals("true")){
+                if (capabilities.get("is_smartphone").equals("true")) {
                     out.println("This is a smartphone");
                 }
 
+                // Iterate over all the device capabilities and print them
                 out.println("All received capabilities");
                 Iterator<String> it = capabilities.keySet().iterator();
-                while (it.hasNext()){
+                while (it.hasNext()) {
                     String k = it.next();
                     out.println(k + ": " + capabilities.get(k));
                 }
             }
-        }
-        catch (WmException e){ // problems such as network errors  or internal server problems
+
+            // Get all the device manufacturers, and print the first twenty
+            int limit = 20;
+            String[] deviceMakes = client.getAllDeviceMakes();
+            out.printf("Print the first %d Brand of %d retrieved from server\n", limit, deviceMakes.length);
+
+            // Sort the device manufacturer names
+            Arrays.sort(deviceMakes);
+            for (int i = 0; i < limit; i++) {
+                out.printf(" - %s\n", deviceMakes[i]);
+            }
+
+            // Now call the WM server to get all device model and marketing names produced by Apple
+            out.println("Print all Model for the Apple Brand");
+            Model.JSONModelMktName[] devNames = client.getAllDevicesForMake("Apple");
+
+            // Sort ModelMktName objects by their model name
+            Arrays.sort(devNames, new ByModelNameComparer());
+
+            for (Model.JSONModelMktName modelMktName : devNames) {
+                out.printf(" - %s %s\n", modelMktName.modelName, modelMktName.marketingName);
+            }
+
+            // Now call the WM server to get all operative system names
+            out.println("Print the list of OSes");
+            String[] oses = client.getAllOSes();
+            // Sort and print all OS names
+            Arrays.sort(oses);
+            for (String os : oses) {
+                out.printf(" - %s\n", os);
+            }
+
+            // Let's call the WM server to get all version of the Android OS
+            out.println("Print all versions for the Android OS");
+            String[] osVersions = client.getAllVersionsForOS("Android");
+            // Sort all Android version numbers and print them.
+            Arrays.sort(osVersions);
+            for (String ver : osVersions) {
+                out.printf(" - %s\n", ver);
+            }
+            // Cleans all client resources. Any call on client API methods after this one will throw a WmException
+            client.destroyConnection();
+        } catch (WmException e) {
+            // problems such as network errors  or internal server problems
             out.println("An error has occurred: " + e.getMessage());
             e.printStackTrace();
         }
 
     }
+}
 
+
+// Comparator used to sort JSONModelMktName objects according to their model name property, for which is used the String natural ordering.
+class ByModelNameComparer implements Comparator<Model.JSONModelMktName> {
+
+    @Override
+    public int compare(Model.JSONModelMktName o1, Model.JSONModelMktName o2) {
+
+        if (o1 == null && o2 == null) {
+            return 0;
+        }
+
+        if (o1 == null && o2 != null) {
+            return 1;
+        }
+
+        if (o1 != null && o2 == null) {
+            return -1;
+        }
+
+        return o1.modelName.compareTo(o2.modelName);
+    }
 }
