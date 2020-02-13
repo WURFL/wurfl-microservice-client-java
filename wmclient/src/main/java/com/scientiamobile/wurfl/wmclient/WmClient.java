@@ -255,7 +255,7 @@ public class WmClient {
      *
      * @param osName a device OS name
      * @return an array containing device_os_version for the given os_name
-     * @throws
+     * @throws WmException In case a connection error occurs or malformed data are sent
      */
     public String[] getAllVersionsForOS(String osName) throws WmException {
         loadDeviceOsesData();
