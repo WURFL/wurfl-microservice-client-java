@@ -1,0 +1,18 @@
+2.0.1
+-------------------------------------
+- Fix for vulnerability ( see: https://nvd.nist.gov/vuln/detail/CVE-2019-10172) which affects jackson 1.9.x versions
+
+2.0.0
+-------------------------------------
+- Initial version. Exposed methods:
+    - WmClient.create
+    - getInfo
+    - getAllDeviceMakes
+    - getAllDevicesForMake(String make)
+    - getAllOSes
+    - getAllVersionsForOS(String os)
+    - lookupUseragent(useragent)
+    - lookupRequest(HttpServletRequest)
+    - lookupDeviceId(deviceId)
+    - setRequested*Capabilites(capabilities)
+    - destroyConnection
