@@ -9,7 +9,7 @@ This is the Java Client API for accessing the WURFL Microservice. The API is rel
 - WURFL Microservice for AWS: https://www.scientiamobile.com/products/wurfl-device-detection-microservice-aws/ 
 
 Java implementation of the WM Client api.
-Requires Java 6 or above.
+Requires Java 7 or above (only version 2.0.0 is compatible with Java 6)
 
 The Example project contains an example of client api usage for a console application :
 
