@@ -424,6 +424,9 @@
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
+                                <configuration>
+                                    <finalName>wm-client-java</finalName>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
