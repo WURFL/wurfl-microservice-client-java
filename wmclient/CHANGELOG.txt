@@ -1,6 +1,7 @@
 2.0.2
 -------------------------------------
-- Updated unit tests to run on different WURFL Microservice server configurations
+- Updated unit tests to run on different WURFL Microservice server configurations.
+- Removed not needed dependency on Jackson
 
 2.0.1
 -------------------------------------
