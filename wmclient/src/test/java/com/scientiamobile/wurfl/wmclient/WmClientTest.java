@@ -143,7 +143,7 @@ public class WmClientTest {
 
     @Test
     public void lookupUserAgentWithSpecificCapsTest() throws WmException {
-        String[] reqCaps = {"brand_name", "model_name", "max_image_width", "model_extra_info", "is_android", "is_ios", "is_app"};
+        String[] reqCaps = {"brand_name", "model_name", "physical_screen_width", "device_os", "is_android", "is_ios", "is_app"};
 
         _client.setRequestedCapabilities(reqCaps);
         String ua = "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
