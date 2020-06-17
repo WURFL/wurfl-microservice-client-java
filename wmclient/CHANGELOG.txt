@@ -1,3 +1,7 @@
+2.0.3
+-------------------------------------
+- Bumped commons-collections from 3.2.1 to 3.2.2 to fix library vulnerability
+
 2.0.2
 -------------------------------------
 - Updated unit tests to run on different WURFL Microservice server configurations.
