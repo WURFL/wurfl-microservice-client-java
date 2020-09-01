@@ -18,6 +18,7 @@ package com.scientiamobile.wurfl.wmclient;
 import com.google.gson.Gson;
 import com.scientiamobile.wurfl.wmclient.Model.Request;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -39,6 +40,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.scientiamobile.wurfl.wmclient.Model.newRequest;
 
@@ -152,6 +154,18 @@ public class WmClient {
         } catch (Exception e) {
             throw new WmException("Unable to create wm client: " + e.getMessage());
         }
+    }
+
+    private Map<String,String> toLowerKeys(Map<String,String> map){
+        Map<String,String> lowerKeysMap = new ConcurrentHashMap<String, String>();
+        if (map == null) {
+            return lowerKeysMap;
+        }
+
+        for(String c: map.keySet()){
+            lowerKeysMap.put(c.toLowerCase(), map.get(c));
+        }
+        return lowerKeysMap;
     }
 
     private static boolean checkData(Model.JSONInfoData info) {
@@ -356,6 +370,29 @@ public class WmClient {
         Map<String, String> reqHeaders = new HashMap<String, String>();
         for (String hname : importantHeaders) {
             String hval = httpRequest.getHeader(hname);
+            if (!StringUtils.isEmpty(hval)) {
+                reqHeaders.put(hname, hval);
+            }
+        }
+
+        Model.JSONDeviceData device = internalRequest("/v2/lookuprequest/json", newRequest(reqHeaders, this.requestedStaticCaps,
+                this.requestedVirtualCaps, null), USERAGENT_CACHE_TYPE);
+        return device;
+    }
+
+    /**
+     * Performs a device detection using an HTTP request object, as passed from Java Web applications
+     *
+     * @param httpRequest an instance of HTTPServletRequest
+     * @return An object containing the device capabilities
+     * @throws WmException In case any error occurs during device detection
+     */
+    public Model.JSONDeviceData lookupHeaders(Map<String,String> headers) throws WmException {
+
+        Map<String, String> reqHeaders = new HashMap<String, String>();
+        Map<String, String> lowerKeyMap = toLowerKeys(headers);
+        for (String hname : importantHeaders) {
+            String hval = lowerKeyMap.get(hname.toLowerCase());
             if (!StringUtils.isEmpty(hval)) {
                 reqHeaders.put(hname, hval);
             }
