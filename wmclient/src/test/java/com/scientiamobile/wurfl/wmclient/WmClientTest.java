@@ -267,6 +267,119 @@ public class WmClientTest {
     }
 
     @Test
+    public void LookupHeadersOKTest() throws WmException {
+        HttpServletRequest request = createTestRequest(true);
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("User-Agent".toLowerCase(), "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+        headers.put("Content-Type".toLowerCase(), "gzip, deflate");
+        headers.put("Accept-Encoding".toLowerCase(), "application/json");
+        headers.put("X-UCBrowser-Device-UA".toLowerCase(), "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+        headers.put("Device-Stock-UA".toLowerCase(), "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+
+        Model.JSONDeviceData device = _client.lookupHeaders(headers);
+        assertNotNull(device);
+        Map<String, String> capabilities = device.capabilities;
+        assertNotNull(capabilities);
+        assertTrue(capabilities.size() >= 40);
+        assertEquals("Smart-TV", capabilities.get("form_factor"));
+        assertEquals("5.1.0.13341", capabilities.get("advertised_browser_version"));
+        assertEquals("false", capabilities.get("is_app"));
+        assertEquals("false", capabilities.get("is_app_webview"));
+        assertEquals("Nintendo", capabilities.get("advertised_device_os"));
+        assertEquals("Nintendo Switch", capabilities.get("complete_device_name"));
+        assertEquals("nintendo_switch_ver1", capabilities.get("wurfl_id"));
+    }
+
+    @Test
+    public void LookupHeadersWithMixedCaseTest() throws WmException {
+        HttpServletRequest request = createTestRequest(true);
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("User-AGenT", "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+        headers.put("Content-TYPe", "gzip, deflate");
+        headers.put("Accept-EnCoding", "application/json");
+        headers.put("X-UCBrowsEr-Device-UA", "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+        headers.put("Device-StOck-UA", "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+
+        Model.JSONDeviceData device = _client.lookupHeaders(headers);
+        assertNotNull(device);
+        Map<String, String> capabilities = device.capabilities;
+        assertNotNull(capabilities);
+        assertTrue(capabilities.size() >= 40);
+        assertEquals("Smart-TV", capabilities.get("form_factor"));
+        assertEquals("5.1.0.13341", capabilities.get("advertised_browser_version"));
+        assertEquals("false", capabilities.get("is_app"));
+        assertEquals("false", capabilities.get("is_app_webview"));
+        assertEquals("Nintendo", capabilities.get("advertised_device_os"));
+        assertEquals("Nintendo Switch", capabilities.get("complete_device_name"));
+        assertEquals("nintendo_switch_ver1", capabilities.get("wurfl_id"));
+    }
+
+    @Test
+    public void LookupHeadersWithMixedCaseAndCachedClientTest() throws WmException {
+        WmClient cachedClient = createTestCachedClient(1000);
+        HttpServletRequest request = createTestRequest(true);
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("User-AGenT", "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+        headers.put("Content-TYPe", "gzip, deflate");
+        headers.put("Accept-EnCoding", "application/json");
+        headers.put("X-UCBrowsEr-Device-UA", "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+        headers.put("Device-StOck-UA", "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+
+        Model.JSONDeviceData device = cachedClient.lookupHeaders(headers);
+        assertNotNull(device);
+        Map<String, String> capabilities = device.capabilities;
+        assertNotNull(capabilities);
+        assertTrue(capabilities.size() >= 40);
+        assertEquals("Smart-TV", capabilities.get("form_factor"));
+        assertEquals("5.1.0.13341", capabilities.get("advertised_browser_version"));
+        assertEquals("false", capabilities.get("is_app"));
+        assertEquals("false", capabilities.get("is_app_webview"));
+        assertEquals("Nintendo", capabilities.get("advertised_device_os"));
+        assertEquals("Nintendo Switch", capabilities.get("complete_device_name"));
+        assertEquals("nintendo_switch_ver1", capabilities.get("wurfl_id"));
+
+        int[] cacheSize = cachedClient.getActualCacheSizes();
+        assertEquals(cacheSize[1], 1);
+
+        // Now mix headers case in a different way (we should hit the cache now)
+        headers = new HashMap<String, String>();
+        headers.put("UseR-AGenT", "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+        headers.put("ConTent-TYPe", "gzip, deflate");
+        headers.put("AccEpt-EnCoding", "application/json");
+        headers.put("X-UCbrowsEr-DeviCe-UA", "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+        headers.put("DevIce-StOck-Ua", "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
+
+        device = cachedClient.lookupHeaders(headers);
+        capabilities = device.capabilities;
+        assertNotNull(capabilities);
+        assertEquals("nintendo_switch_ver1", capabilities.get("wurfl_id"));
+        // Cache size should stay 1, which means that previously stored cache value has been hit even if header case has been changed
+        cacheSize = cachedClient.getActualCacheSizes();
+        assertEquals(cacheSize[1], 1);
+        cachedClient.destroyConnection();
+
+
+
+    }
+
+    @Test
+    public void lookupHeadersWithNullOrEmptyHeadersTest() throws WmException {
+
+        Model.JSONDeviceData device = _client.lookupHeaders(null);
+        assertNotNull(device);
+        Map<String, String> capabilities = device.capabilities;
+        assertNotNull(capabilities);
+        assertEquals("generic", capabilities.get("wurfl_id"));
+
+        device = _client.lookupHeaders(new HashMap<String, String>());
+        assertNotNull(device);
+        capabilities = device.capabilities;
+        assertNotNull(capabilities);
+        assertEquals("generic", capabilities.get("wurfl_id"));
+
+    }
+
+    @Test
     public void lookupRequestOkWithSpecificCaps() throws WmException {
 
         String[] reqCaps = {"is_mobile", "form_factor", "is_app", "complete_device_name",
