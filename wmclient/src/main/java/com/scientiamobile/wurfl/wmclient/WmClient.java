@@ -537,7 +537,7 @@ public class WmClient {
         }
 
         // First, do a cache lookup
-        if (StringUtils.isNotEmpty(cacheType) && !StringUtils.isNotEmpty(cacheKey)) {
+        if (StringUtils.isNotEmpty(cacheType) && StringUtils.isNotEmpty(cacheKey)) {
             if (cacheType.equals(DEVICE_ID_CACHE_TYPE) && devIDCache != null) {
                 device = devIDCache.getEntry(request.getWurflId());
                 if (device != null) {
@@ -596,7 +596,7 @@ public class WmClient {
      * @return This client API version
      */
     public String getApiVersion() {
-        return "2.1.0";
+        return "2.1.1";
     }
 
     private void clearCaches() {
