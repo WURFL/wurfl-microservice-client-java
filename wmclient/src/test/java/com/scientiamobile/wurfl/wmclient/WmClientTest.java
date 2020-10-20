@@ -725,6 +725,53 @@ public class WmClientTest {
         }
     }
 
+    @Test
+    public void realCacheUsageTest_2() throws WmException {
+        String host = "localhost";
+        String port = "8080";
+        String envHost = System.getenv("WM_HOST");
+        String envPort = System.getenv("WM_PORT");
+        if (StringUtils.isNotEmpty(envHost)){
+            host = envHost;
+        }
+        if(StringUtils.isNotEmpty(envPort)){
+            port = envPort;
+        }
+        WmClient client = WmClient.create("http", host, port, "");
+        try {
+            long start = System.nanoTime();
+            for (String ua: TestData.USER_AGENTS){
+                client.lookupUseragent(ua);
+            }
+            long elapsedNoCache = System.nanoTime() - start;
+            double avgNoCache = (double)elapsedNoCache/(double)TestData.USER_AGENTS.length;
+
+            // Now, let's add a cache layer
+            client.setCacheSize(100000);
+
+            // fill cache
+            for (String ua: TestData.USER_AGENTS){
+                client.lookupUseragent(ua);
+            }
+
+            // now use it
+            long nu_start = System.nanoTime();
+            for (String ua: TestData.USER_AGENTS){
+                client.lookupUseragent(ua);
+            }
+            long elapsedWithCache = System.nanoTime() - nu_start;
+            double avgWithCache = (double)elapsedWithCache/(double)TestData.USER_AGENTS.length;
+
+            // Cache must be at least an order of magnitude faster
+            assertTrue(avgNoCache > avgWithCache * 10);
+
+        }
+        finally {
+            client.destroyConnection();
+        }
+    }
+
+
 
     static List<Callable<Boolean>> createLookupTasks(int numTasks, final WmClient client) {
         final Map<String,String> testData = createExpectedValueMap(client);
