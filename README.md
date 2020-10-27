@@ -154,3 +154,24 @@ class ByModelNameComparer implements Comparator<Model.JSONModelMktName> {
     }
 }
 ```
+
+### Use all HTTP headers to perform a device detection
+
+```java
+ Map<String, String> headers = new HashMap<String, String>();
+            headers.put("Accept-Encoding", "gzip, deflate");
+            headers.put("Accept", "text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1");
+            headers.put("Accept-Language", "en");
+            headers.put("Device-Stock-Ua", "Mozilla/5.0 (Linux; Android 8.1.0; SM-J610G Build/M1AJQ; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/69.0.3497.100 Mobile Safari/537.36");
+            headers.put("Forwarded", "for=\"110.54.224.195:36350\"");
+            headers.put("Save-Data", "on");
+            headers.put("Referer", "https://www.cram.com/flashcards/labor-and-delivery-questions-889210");
+            headers.put("User-Agent", "Opera/9.80 (Android; Opera Mini/51.0.2254/184.121; U; en) Presto/2.12.423 Version/12.16");
+            headers.put("X-Clacks-Overhead", "GNU ph");
+            headers.put("X-Forwarded-For", "110.54.224.195, 82.145.210.235");
+            headers.put("X-Operamini-Features", "advanced, camera, download, file_system, folding, httpping, pingback, routing, touch, viewport");
+            headers.put("X-Operamini-Phone", "Android #");
+            headers.put("X-Operamini-Phone-Ua", "Mozilla/5.0 (Linux; Android 8.1.0; SM-J610G Build/M1AJQ; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/69.0.3497.100 Mobile Safari/537.36");
+            Model.JSONDeviceData device = client.lookupHeaders(headers);
+
+```
