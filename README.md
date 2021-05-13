@@ -13,7 +13,16 @@ This is the Java Client API for accessing the WURFL Microservice. The API is rel
 - WURFL Microservice for Google Cloud Platform: https://www.scientiamobile.com/products/wurfl-microservice-for-gcp/
 
 Java implementation of the WM Client api.
-Requires Java 7 or above (only version 2.0.0 is compatible with Java 6)
+
+Minimum Java version compatibility table
+
+|   | Min. Java version | WM client version(s) |
+|---|--------------|----------------------|
+|   |       8      | 2.1.3                |
+|   |       7      | 2.1.0                |
+|   |       6      | 2.0.0                |
+
+Version 2.1.2 (Java 7) and 2.1.3 (Java 8) only differ in their dependencies (see CHANGELOG)
 
 The Example project contains an example of client api usage for a console application :
 

@@ -18,7 +18,6 @@ package com.scientiamobile.wurfl.wmclient;
 import com.google.gson.Gson;
 import com.scientiamobile.wurfl.wmclient.Model.Request;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -36,9 +35,6 @@ import org.apache.http.util.EntityUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -596,7 +592,7 @@ public class WmClient {
      * @return This client API version
      */
     public String getApiVersion() {
-        return "2.1.1";
+        return "2.1.3";
     }
 
     private void clearCaches() {
