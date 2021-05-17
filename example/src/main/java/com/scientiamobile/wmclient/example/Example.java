@@ -58,7 +58,7 @@ public class Example {
             headers.put("Accept-Encoding", "gzip, deflate");
             headers.put("Accept", "text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1");
             headers.put("Accept-Language", "en");
-            headers.put("Device-Stock-Ua", "Mozilla/5.0 (Linux; Android 8.1.0; SM-J610G Build/M1AJQ; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/69.0.3497.100 Mobile Safari/537.36");
+            headers.put("Device-Stock-Ua", ua);
             headers.put("Forwarded", "for=\"110.54.224.195:36350\"");
             headers.put("Save-Data", "on");
             headers.put("Referer", "https://www.cram.com/flashcards/labor-and-delivery-questions-889210");
@@ -136,7 +136,6 @@ public class Example {
             e.printStackTrace();
         }
         out.println("------------ End of WM Java client example ------------");
-        exit(0);
     }
 }
 
