@@ -67,7 +67,6 @@ public class Example {
             headers.put("X-Forwarded-For", "110.54.224.195, 82.145.210.235");
             headers.put("X-Operamini-Features", "advanced, camera, download, file_system, folding, httpping, pingback, routing, touch, viewport");
             headers.put("X-Operamini-Phone", "Android #");
-            headers.put("X-Operamini-Phone-Ua", "Mozilla/5.0 (Linux; Android 7.1.1; ONEPLUS A5000 Build/NMF26X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Mobile Safari/537.36");
             Model.JSONDeviceData device = client.lookupHeaders(headers);
 
             // Applicative error, ie: invalid input provided
