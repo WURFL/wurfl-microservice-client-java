@@ -135,7 +135,7 @@ public class Example {
             out.println("An error has occurred: " + e.getMessage());
             e.printStackTrace();
         }
-
+    out.println("------------ End of WM Java client example ------------");
     }
 }
 
