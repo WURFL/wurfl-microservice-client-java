@@ -19,6 +19,7 @@ import com.scientiamobile.wurfl.wmclient.*;
 
 import java.util.*;
 
+import static java.lang.System.exit;
 import static java.lang.System.out;
 
 public class Example {
@@ -135,7 +136,8 @@ public class Example {
             out.println("An error has occurred: " + e.getMessage());
             e.printStackTrace();
         }
-    out.println("------------ End of WM Java client example ------------");
+        out.println("------------ End of WM Java client example ------------");
+        exit(0);
     }
 }
 
