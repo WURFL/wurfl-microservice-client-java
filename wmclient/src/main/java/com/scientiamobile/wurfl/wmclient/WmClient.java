@@ -379,7 +379,7 @@ public class WmClient {
     /**
      * Performs a device detection using an HTTP request object, as passed from Java Web applications
      *
-     * @param httpRequest an instance of HTTPServletRequest
+     * @param request headers headers map
      * @return An object containing the device capabilities
      * @throws WmException In case any error occurs during device detection
      */
