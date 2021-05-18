@@ -1,3 +1,8 @@
+2.1.3
+-------------------------------------
+- Updated commons.io from 2.2 to 2.7 to fix known vulnerability
+- Minimum Java version required is 8 (needed by the new commons.io)
+
 2.1.2
 -------------------------------------
 - Updated example application
