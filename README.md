@@ -184,3 +184,52 @@ class ByModelNameComparer implements Comparator<Model.JSONModelMktName> {
             Model.JSONDeviceData device = client.lookupHeaders(headers);
 
 ```
+
+Migrating to Jakarta EE9 (Tomcat 10 and other new servers)
+-----------
+With Jakarta EE 9, the enterprise Java application ecosystem has faced a huge change. The most impacting one is the naming change from the Oracle owned `javax.*` 
+package namespace to the new `jakarta.*`
+This naming change will break most of the code that, for example, uses class `HttpServletRequest` or others from the same packages.
+So if you want to use the `wurfl-microservice-client-java` in a web/application server that supports Jakarta EE9 such as:
+  - Tomcat 10.x
+  - Glassfish 6.x
+  - Jetty 11.x
+  or any other that will comply to this spec in the near future, you will need to migrate both the microservice client and the sample application (or yours, if needed) and build them from the source code.
+    
+### Step 1: use the Tomcat migration tool
+If you use Tomcat 10 you can migrate part of the code by using the Tomcat Migration tool: https://tomcat.apache.org/download-migration.cgi
+This tool replaces all the projects javax.* occurrences with jakarta.*. There are different option that you can specify depending on how your application uses the 
+Java Enterprise features. Execute the `migrate.sh` script without parameters for more info on the usage options.
+
+The command `./migrate.sh <path/to/wurfl-microservice-client-java> <path/to/destination dir> -profile=EE` will generate a "migrated" copy of the project code using any javax.* package to
+the specified destination directory.
+
+### Step 2: check the pom.xml dependencies
+The migration tool tries to update the dependencies in your pom.xml files, but it's not perfect in that at the current development stage.
+This means you have to check the EE dependencies yourself.
+
+Wurfl microservice client java only depends on the servlet API, which must be modified as shown below 
+
+```xml
+<dependencies>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+```
+
+Please note that your application may need more dependencies to be updated in order to make it compliant with Jakarta EE 9 on Tomcat 10 (for example JSP and JSTç dependencies).
+
+- JDK 16
+- Maven 3.8.1
+- Tomcat 10.0.6
+
+### Step 3: updating other dependencies or code (if needed).
+If you are migrating your custom project to Jakarta EE9, the project build may fail because some other dependency have not been updated, or its interface has changed. Fix the dependency or code and retry building you project.
+
+### Migrating an already compiled wurfl-microservice-client-java jar file.
+There may be cases in which you don't want or cannot rebuild the client or the application from the source code. In that case you can use a tool called [Eclipse Transformer](https://github.com/eclipse/transformer/blob/main/README.md) which can be executed on the wurfl-microservice-client-java JAR file and return an output JAR file in which the bytecode is made compliant with the new namespace **jakarta.***
+
