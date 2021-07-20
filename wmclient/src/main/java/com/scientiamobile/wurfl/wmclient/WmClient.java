@@ -592,7 +592,7 @@ public class WmClient {
      * @return This client API version
      */
     public String getApiVersion() {
-        return "2.1.3";
+        return "2.1.4";
     }
 
     private void clearCaches() {
