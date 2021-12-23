@@ -29,7 +29,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
@@ -160,7 +159,7 @@ public class WmClientTest {
     }
 
     @Test
-    public void lookupUseragentEmptyUaTest() throws WmException {
+    public void lookupUseragentEmptyUaTest() {
 
         boolean exc = false;
         try {
@@ -269,8 +268,8 @@ public class WmClientTest {
 
     @Test
     public void LookupHeadersOKTest() throws WmException {
-        HttpServletRequest request = createTestRequest(true);
-        Map<String, String> headers = new HashMap<String, String>();
+
+        Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent".toLowerCase(), "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
         headers.put("Content-Type".toLowerCase(), "gzip, deflate");
         headers.put("Accept-Encoding".toLowerCase(), "application/json");
@@ -294,7 +293,7 @@ public class WmClientTest {
     @Test
     public void LookupHeadersWithMixedCaseTest() throws WmException {
         HttpServletRequest request = createTestRequest(true);
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("User-AGenT", "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
         headers.put("Content-TYPe", "gzip, deflate");
         headers.put("Accept-EnCoding", "application/json");
@@ -319,7 +318,7 @@ public class WmClientTest {
     public void LookupHeadersWithMixedCaseAndCachedClientTest() throws WmException {
         WmClient cachedClient = createTestCachedClient(1000);
         HttpServletRequest request = createTestRequest(true);
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("User-AGenT", "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
         headers.put("Content-TYPe", "gzip, deflate");
         headers.put("Accept-EnCoding", "application/json");
@@ -343,7 +342,7 @@ public class WmClientTest {
         assertEquals(cacheSize[1], 1);
 
         // Now mix headers case in a different way (we should hit the cache now)
-        headers = new HashMap<String, String>();
+        headers = new HashMap<>();
         headers.put("UseR-AGenT", "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341");
         headers.put("ConTent-TYPe", "gzip, deflate");
         headers.put("AccEpt-EnCoding", "application/json");
@@ -372,7 +371,7 @@ public class WmClientTest {
         assertNotNull(capabilities);
         assertEquals("generic", capabilities.get("wurfl_id"));
 
-        device = _client.lookupHeaders(new HashMap<String, String>());
+        device = _client.lookupHeaders(new HashMap<>());
         assertNotNull(device);
         capabilities = device.capabilities;
         assertNotNull(capabilities);
@@ -566,7 +565,7 @@ public class WmClientTest {
             // Testing a version before 1.2.0.0
             String v = client.getInfo().getWmVersion();
             if(VersionUtils.compareVersionNumbers(v, "1.2.0.0") < 0){
-                System.out.println(String.format("Version is %s , skipping test", v));
+                System.out.printf("Version is %s , skipping test%n", v);
                 return;
             }
 
@@ -585,7 +584,7 @@ public class WmClientTest {
         // Testing a version before 1.2.0.0
         String v = client.getInfo().getWmVersion();
         if(VersionUtils.compareVersionNumbers(v, "1.2.0.0") < 0){
-            System.out.println(String.format("Version is %s , skipping test", v));
+            System.out.printf("Version is %s , skipping test%n", v);
             return;
         }
         try {
@@ -605,7 +604,7 @@ public class WmClientTest {
 
             String v = client.getInfo().getWmVersion();
             if(VersionUtils.compareVersionNumbers(v, "1.2.0.0") < 0){
-                System.out.println(String.format("Version is %s , skipping test", v));
+                System.out.printf("Version is %s , skipping test%n", v);
                 return;
         }
 
@@ -631,7 +630,7 @@ public class WmClientTest {
         try {
         String v = client.getInfo().getWmVersion();
         if(VersionUtils.compareVersionNumbers(v, "1.2.0.0") < 0){
-            System.out.println(String.format("Version is %s , skipping test", v));
+            System.out.printf("Version is %s , skipping test%n", v);
             return;
         }
 
@@ -651,7 +650,7 @@ public class WmClientTest {
         try {
             String v = client.getInfo().getWmVersion();
             if(VersionUtils.compareVersionNumbers(v, "1.2.0.0") < 0){
-                System.out.println(String.format("Version is %s , skipping test", v));
+                System.out.printf("Version is %s , skipping test%n", v);
                 return;
             }
 
@@ -672,10 +671,10 @@ public class WmClientTest {
         try {
             String v = client.getInfo().getWmVersion();
             if(VersionUtils.compareVersionNumbers(v, "1.2.0.0") < 0){
-                System.out.println(String.format("Version is %s , skipping test", v));
+                System.out.printf("Version is %s , skipping test%n", v);
                 return;
             }
-            client.getAllDevicesForMake("Fakething");
+            client.getAllVersionsForOS("FakeOS");
         } finally {
             client.destroyConnection();
         }
@@ -775,27 +774,24 @@ public class WmClientTest {
 
     static List<Callable<Boolean>> createLookupTasks(int numTasks, final WmClient client) {
         final Map<String,String> testData = createExpectedValueMap(client);
-        List<Callable<Boolean>> ltasks = new ArrayList<Callable<Boolean>>(numTasks);
+        List<Callable<Boolean>> ltasks = new ArrayList<>(numTasks);
         for (int i = 0; i < numTasks; i++) {
             final int tindex = i;
-            ltasks.add(new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    System.out.println("Starting task#: " + tindex);
-                    int c = 0;
-                    try {
-                        for (String line: testData.keySet()) {
-                            Model.JSONDeviceData d = client.lookupUseragent(line);
-                            assertNotNull(d);
-                            assertEquals(d.capabilities.get("wurfl_id"), testData.get(line));
-                            c++;
-                        }
-                        System.out.println("Lines read from terminated task #" + tindex + ": " + c);
-                        return true;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return false;
+            ltasks.add(() -> {
+                System.out.println("Starting task#: " + tindex);
+                int c = 0;
+                try {
+                    for (String line: testData.keySet()) {
+                        Model.JSONDeviceData d = client.lookupUseragent(line);
+                        assertNotNull(d);
+                        assertEquals(d.capabilities.get("wurfl_id"), testData.get(line));
+                        c++;
                     }
+                    System.out.println("Lines read from terminated task #" + tindex + ": " + c);
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
                 }
             });
         }
@@ -833,7 +829,7 @@ public class WmClientTest {
     private HttpServletRequest createTestRequest(final boolean provideHeaders) {
         return new HttpServletRequest() {
 
-            private Map<String, String> headers = new HashMap<String, String>();
+            private Map<String, String> headers = new HashMap<>();
             private String ua = "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
             private String xucbr = "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
             private String dstkUa = "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
@@ -1012,7 +1008,7 @@ public class WmClientTest {
             }
 
             @Override
-            public ServletInputStream getInputStream() throws IOException {
+            public ServletInputStream getInputStream() {
                 return null;
             }
 
@@ -1057,7 +1053,7 @@ public class WmClientTest {
             }
 
             @Override
-            public BufferedReader getReader() throws IOException {
+            public BufferedReader getReader() {
                 return null;
             }
 
@@ -1130,7 +1126,7 @@ public class WmClientTest {
 
     private static Map<String,String> createExpectedValueMap(WmClient client){
         String[] userAgentList = TestData.createTestUserAgentList();
-        Map<String,String> m = new HashMap<String, String>();
+        Map<String,String> m = new HashMap<>();
         for(String ua: userAgentList){
             try {
                 m.put(ua, client.lookupUseragent(ua).capabilities.get("wurfl_id"));
