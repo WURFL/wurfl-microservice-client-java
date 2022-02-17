@@ -291,6 +291,34 @@ public class WmClientTest {
     }
 
     @Test
+    public void LookupHeadersWithFrozenUaAndClientHintsTest() throws WmException {
+
+        Map<String, String> headers = new HashMap<>();
+        // This user-agent is frozen, since has no trace of version etc
+        headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 7.0; Sri) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.0.0 Mobile Safari/537.36");
+        headers.put("Sec-CH-UA", "\"Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99\"");
+        headers.put("Sec-CH-UA-Full-Version", "89.0.4389.105");
+        headers.put("Sec-CH-UA-Platform", "Android");
+        // note that it's different from user-agent's
+        // this value from sec-ch-ua-platform-version will be used since ua is frozen
+        headers.put("Sec-CH-UA-Platform-Version", "7.1");
+        headers.put("Sec-CH-UA-Model", "Redmi Note 4");
+        headers.put("Content-Type".toLowerCase(), "gzip, deflate");
+        headers.put("Accept-Encoding".toLowerCase(), "application/json");
+
+
+        Model.JSONDeviceData device = _client.lookupHeaders(headers);
+        assertNotNull(device);
+        Map<String, String> capabilities = device.capabilities;
+        assertNotNull(capabilities);
+        assertTrue(capabilities.size() >= 40);
+        assertEquals("89.0.4389.105", capabilities.get("advertised_browser_version"));
+        assertEquals("Android", capabilities.get("advertised_device_os"));
+        assertEquals("7.1", capabilities.get("advertised_device_os_version"));
+        assertEquals("xiaomi_redmi_note_4_ver1_suban71", capabilities.get("wurfl_id"));
+    }
+
+    @Test
     public void LookupHeadersWithMixedCaseTest() throws WmException {
         HttpServletRequest request = createTestRequest(true);
         Map<String, String> headers = new HashMap<>();
@@ -772,18 +800,8 @@ public class WmClientTest {
 
     @Test
     public void checkImportantHeadersTest() throws WmException {
-        String host = "localhost";
-        String port = "8080";
-        String envHost = System.getenv("WM_HOST");
-        String envPort = System.getenv("WM_PORT");
-        if (StringUtils.isNotEmpty(envHost)){
-            host = envHost;
-        }
-        if(StringUtils.isNotEmpty(envPort)){
-            port = envPort;
-        }
-        WmClient client = WmClient.create("http", host, port, "");
-        String[] importantHeaders = client.getImportantHeaders();
+        WmClient cachedClient = createTestCachedClient(1000);
+        String[] importantHeaders = cachedClient.getImportantHeaders();
         assertTrue(importantHeaders.length >= 12, "Wrong number of important headers. Received: "
                 + Arrays.toString(importantHeaders));
 
@@ -795,6 +813,7 @@ public class WmClientTest {
             }
         }
         assertTrue(secChUaHeadersCount >= 5);
+        cachedClient.destroyConnection();
     }
 
 
