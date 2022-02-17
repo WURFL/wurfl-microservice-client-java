@@ -312,10 +312,10 @@ public class WmClientTest {
         Map<String, String> capabilities = device.capabilities;
         assertNotNull(capabilities);
         assertTrue(capabilities.size() >= 40);
-        assertEquals("89.0.4389.105", capabilities.get("advertised_browser_version"));
-        assertEquals("Android", capabilities.get("advertised_device_os"));
-        assertEquals("7.1", capabilities.get("advertised_device_os_version"));
-        assertEquals("xiaomi_redmi_note_4_ver1_suban71", capabilities.get("wurfl_id"));
+        assertEquals(capabilities.get("advertised_browser_version"), "89.0.4389.105");
+        assertEquals(capabilities.get("advertised_device_os"), "Android");
+        assertEquals(capabilities.get("advertised_device_os_version"), "7.1");
+        assertEquals(capabilities.get("wurfl_id"), "xiaomi_redmi_note_4_ver1_suban71");
     }
 
     @Test
@@ -875,7 +875,7 @@ public class WmClientTest {
     private HttpServletRequest createTestRequest(final boolean provideHeaders) {
         return new HttpServletRequest() {
 
-            private Map<String, String> headers = new HashMap<>();
+            private final Map<String, String> headers = new HashMap<>();
             private String ua = "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
             private String xucbr = "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
             private String dstkUa = "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
