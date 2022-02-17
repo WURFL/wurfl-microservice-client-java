@@ -770,6 +770,33 @@ public class WmClientTest {
         }
     }
 
+    @Test
+    public void checkImportantHeadersTest() throws WmException {
+        String host = "localhost";
+        String port = "8080";
+        String envHost = System.getenv("WM_HOST");
+        String envPort = System.getenv("WM_PORT");
+        if (StringUtils.isNotEmpty(envHost)){
+            host = envHost;
+        }
+        if(StringUtils.isNotEmpty(envPort)){
+            port = envPort;
+        }
+        WmClient client = WmClient.create("http", host, port, "");
+        String[] importantHeaders = client.getImportantHeaders();
+        assertTrue(importantHeaders.length >= 12, "Wrong number of important headers. Received: "
+                + Arrays.toString(importantHeaders));
+
+        System.out.println(Arrays.toString(importantHeaders));
+        int secChUaHeadersCount = 0;
+        for(String h: importantHeaders){
+            if(h.toLowerCase().startsWith("sec")) {
+                secChUaHeadersCount++;
+            }
+        }
+        assertTrue(secChUaHeadersCount >= 5);
+    }
+
 
 
     static List<Callable<Boolean>> createLookupTasks(int numTasks, final WmClient client) {
