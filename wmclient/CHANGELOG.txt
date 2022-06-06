@@ -1,3 +1,8 @@
+2.1.5
+-------------------------------------
+- Updated Gson to version 2.9.0 to solve vulnerability issue
+- Some code cleanup
+
 2.1.4
 -------------------------------------
 - Updated Apache httpclient to fix known vulnerability
