@@ -30,7 +30,7 @@ class LRUCache<K, E> {
 
     private int size;
 
-    private ConcurrentHashMap<K, Node> cache;
+    private final ConcurrentHashMap<K, Node> cache;
     private Node head;
     private Node tail;
 
@@ -45,7 +45,7 @@ class LRUCache<K, E> {
         } else {
             this.size = DEFAULT_SIZE;
         }
-        this.cache = new ConcurrentHashMap<K, Node>(maxSize, 0.75f, 64);
+        this.cache = new ConcurrentHashMap<>(maxSize, 0.75f, 64);
         this.mutex = this;
     }
 

@@ -50,10 +50,10 @@ public class WmClient {
     private final static String DEVICE_ID_CACHE_TYPE = "dId-cache";
     private final static String USERAGENT_CACHE_TYPE = "ua-cache";
 
-    private String scheme;
-    private String host;
-    private String port;
-    private String baseURI;
+    private final String scheme;
+    private final String host;
+    private final String port;
+    private final String baseURI;
 
     // These are the lists of all static or virtual that can be returned by the running wm server
     private String[] staticCaps;
@@ -84,7 +84,7 @@ public class WmClient {
     // Map that associates brand name to JSONModelMktName objects
     private Map<String, List<Model.JSONModelMktName>> deviceMakesMap = new HashMap<String, List<Model.JSONModelMktName>>();
     // Map that associates os name to JSONDeviceOsVersions objects
-    private Map<String, List<String>> deviceOsVersionsMap = new HashMap<String, List<String>>();
+    private Map<String, List<String>> deviceOsVersionsMap = new HashMap<>();
     // List of all device OSes
     private String[] deviceOSes = new String[0];
     // Lock object user for deviceOSes safety
@@ -153,7 +153,7 @@ public class WmClient {
     }
 
     private Map<String,String> toLowerKeys(Map<String,String> map){
-        Map<String,String> lowerKeysMap = new ConcurrentHashMap<String, String>();
+        Map<String,String> lowerKeysMap = new ConcurrentHashMap<>();
         if (map == null) {
             return lowerKeysMap;
         }
@@ -178,7 +178,7 @@ public class WmClient {
         try {
             final HttpGet req = new HttpGet(createUrl("/v2/getinfo/json"));
             Class<Model.JSONInfoData> type = Model.JSONInfoData.class;
-            Model.JSONInfoData info = _internalClient.execute(req, new WmDataHandler<Model.JSONInfoData>(type));
+            Model.JSONInfoData info = _internalClient.execute(req, new WmDataHandler<>(type));
             if (!(checkData(info))) {
                 throw new WmException("Server returned empty data or a wrong json format");
             }
@@ -238,15 +238,15 @@ public class WmClient {
         try {
             final HttpGet req = new HttpGet(createUrl("/v2/alldeviceosversions/json"));
             Class<Model.JSONDeviceOsVersions[]> type = Model.JSONDeviceOsVersions[].class;
-            Model.JSONDeviceOsVersions[] localOSes = _internalClient.execute(req, new WmDataHandler<Model.JSONDeviceOsVersions[]>(type));
+            Model.JSONDeviceOsVersions[] localOSes = _internalClient.execute(req, new WmDataHandler<>(type));
 
-            Map<String, List<String>> dmMap = new HashMap<String, List<String>>();
-            Set<String> devOSes = new HashSet<String>();
+            Map<String, List<String>> dmMap = new HashMap<>();
+            Set<String> devOSes = new HashSet<>();
             for (Model.JSONDeviceOsVersions osVer : localOSes) {
                 devOSes.add(osVer.osName);
 
                 if (!dmMap.containsKey(osVer.osName)) {
-                    dmMap.put(osVer.osName, new ArrayList<String>());
+                    dmMap.put(osVer.osName, new ArrayList<>());
                 }
                 dmMap.get(osVer.osName).add(osVer.osVersion);
             }
@@ -296,10 +296,10 @@ public class WmClient {
         try {
             final HttpGet req = new HttpGet(createUrl("/v2/alldevices/json"));
             Class<Model.JSONMakeModel[]> type = Model.JSONMakeModel[].class;
-            Model.JSONMakeModel[] localMakeModels = _internalClient.execute(req, new WmDataHandler<Model.JSONMakeModel[]>(type));
+            Model.JSONMakeModel[] localMakeModels = _internalClient.execute(req, new WmDataHandler<>(type));
 
-            Map<String, List<Model.JSONModelMktName>> dmMap = new HashMap<String, List<Model.JSONModelMktName>>();
-            Set<String> devMakes = new HashSet<String>();
+            Map<String, List<Model.JSONModelMktName>> dmMap = new HashMap<>();
+            Set<String> devMakes = new HashSet<>();
             for (Model.JSONMakeModel mkModel : localMakeModels) {
                 if (!dmMap.containsKey(mkModel.brandName)) {
                     devMakes.add(mkModel.brandName);
@@ -307,7 +307,7 @@ public class WmClient {
 
                 List<Model.JSONModelMktName> mdMkNames = dmMap.get(mkModel.brandName);
                 if (mdMkNames == null) {
-                    mdMkNames = new ArrayList<Model.JSONModelMktName>();
+                    mdMkNames = new ArrayList<>();
                     dmMap.put(mkModel.brandName, mdMkNames);
                 }
                 mdMkNames.add(Model.newJSONModelMktName(mkModel.modelName, mkModel.marketingName));
@@ -331,7 +331,7 @@ public class WmClient {
      */
     public Model.JSONDeviceData lookupUseragent(String useragent) throws WmException {
 
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", useragent);
         Request request = newRequest(headers, this.requestedStaticCaps, this.requestedVirtualCaps, null);
         return internalRequest("/v2/lookupuseragent/json", request, USERAGENT_CACHE_TYPE);
@@ -363,7 +363,7 @@ public class WmClient {
             throw new WmException("HttpServletRequest cannot be null");
         }
 
-        Map<String, String> reqHeaders = new HashMap<String, String>();
+        Map<String, String> reqHeaders = new HashMap<>();
         for (String hname : importantHeaders) {
             String hval = httpRequest.getHeader(hname);
             if (!StringUtils.isEmpty(hval)) {
@@ -371,9 +371,8 @@ public class WmClient {
             }
         }
 
-        Model.JSONDeviceData device = internalRequest("/v2/lookuprequest/json", newRequest(reqHeaders, this.requestedStaticCaps,
+        return internalRequest("/v2/lookuprequest/json", newRequest(reqHeaders, this.requestedStaticCaps,
                 this.requestedVirtualCaps, null), USERAGENT_CACHE_TYPE);
-        return device;
     }
 
     /**
@@ -385,7 +384,7 @@ public class WmClient {
      */
     public Model.JSONDeviceData lookupHeaders(Map<String,String> headers) throws WmException {
 
-        Map<String, String> reqHeaders = new HashMap<String, String>();
+        Map<String, String> reqHeaders = new HashMap<>();
         Map<String, String> lowerKeyMap = toLowerKeys(headers);
         for (String hname : importantHeaders) {
             String hval = lowerKeyMap.get(hname.toLowerCase());
@@ -425,7 +424,7 @@ public class WmClient {
             return;
         }
 
-        List<String> vCaps = new ArrayList<String>();
+        List<String> vCaps = new ArrayList<>();
         for (String name : vcapsList) {
             if (hasVirtualCapability(name)) {
                 vCaps.add(name);
@@ -459,8 +458,8 @@ public class WmClient {
             return;
         }
 
-        List<String> capNames = new ArrayList<String>();
-        List<String> vcapNames = new ArrayList<String>();
+        List<String> capNames = new ArrayList<>();
+        List<String> vcapNames = new ArrayList<>();
 
         for (String name : capsList) {
             if (hasStaticCapability(name)) {
@@ -558,7 +557,7 @@ public class WmClient {
 
         Class<Model.JSONDeviceData> type = Model.JSONDeviceData.class;
         try {
-            device = _internalClient.execute(postMethod, new WmDataHandler<Model.JSONDeviceData>(type));
+            device = _internalClient.execute(postMethod, new WmDataHandler<>(type));
             if (StringUtils.isNotEmpty(device.error)) {
                 throw new WmException("Unable to complete request to WM server: " + device.error);
             }
@@ -584,15 +583,15 @@ public class WmClient {
      * @param uaMaxEntries maximum cache dimension
      */
     public void setCacheSize(int uaMaxEntries) {
-        this.uaCache = new LRUCache<String, Model.JSONDeviceData>(uaMaxEntries);
-        this.devIDCache = new LRUCache<String, Model.JSONDeviceData>(); // this has the default cache size
+        this.uaCache = new LRUCache<>(uaMaxEntries);
+        this.devIDCache = new LRUCache<>(); // this has the default cache size
     }
 
     /**
      * @return This client API version
      */
     public String getApiVersion() {
-        return "2.1.4";
+        return "2.1.5";
     }
 
     private void clearCaches() {
@@ -606,12 +605,12 @@ public class WmClient {
 
         makeModels = new Model.JSONMakeModel[0];
         deviceMakes = new String[0];
-        deviceMakesMap = new HashMap<String, List<Model.JSONModelMktName>>();
+        deviceMakesMap = new HashMap<>();
 
 
         synchronized (deviceOSesLock) {
             deviceOSes = new String[0];
-            deviceOsVersionsMap = new HashMap<String, List<String>>();
+            deviceOsVersionsMap = new HashMap<>();
         }
     }
 

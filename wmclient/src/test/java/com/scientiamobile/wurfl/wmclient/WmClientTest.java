@@ -291,6 +291,34 @@ public class WmClientTest {
     }
 
     @Test
+    public void LookupHeadersWithFrozenUaAndClientHintsTest() throws WmException {
+
+        Map<String, String> headers = new HashMap<>();
+        // This user-agent is frozen, since has no trace of version etc
+        headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 7.0; Sri) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.0.0 Mobile Safari/537.36");
+        headers.put("Sec-CH-UA", "\"Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99\"");
+        headers.put("Sec-CH-UA-Full-Version", "89.0.4389.105");
+        headers.put("Sec-CH-UA-Platform", "Android");
+        // note that it's different from user-agent's
+        // this value from sec-ch-ua-platform-version will be used since ua is frozen
+        headers.put("Sec-CH-UA-Platform-Version", "7.1");
+        headers.put("Sec-CH-UA-Model", "Redmi Note 4");
+        headers.put("Content-Type".toLowerCase(), "gzip, deflate");
+        headers.put("Accept-Encoding".toLowerCase(), "application/json");
+
+
+        Model.JSONDeviceData device = _client.lookupHeaders(headers);
+        assertNotNull(device);
+        Map<String, String> capabilities = device.capabilities;
+        assertNotNull(capabilities);
+        assertTrue(capabilities.size() >= 40);
+        assertEquals(capabilities.get("advertised_browser_version"), "89.0.4389.105");
+        assertEquals(capabilities.get("advertised_device_os"), "Android");
+        assertEquals(capabilities.get("advertised_device_os_version"), "7.1");
+        assertEquals(capabilities.get("wurfl_id"), "xiaomi_redmi_note_4_ver1_suban71");
+    }
+
+    @Test
     public void LookupHeadersWithMixedCaseTest() throws WmException {
         HttpServletRequest request = createTestRequest(true);
         Map<String, String> headers = new HashMap<>();
@@ -770,6 +798,24 @@ public class WmClientTest {
         }
     }
 
+    @Test
+    public void checkImportantHeadersTest() throws WmException {
+        WmClient cachedClient = createTestCachedClient(1000);
+        String[] importantHeaders = cachedClient.getImportantHeaders();
+        assertTrue(importantHeaders.length >= 12, "Wrong number of important headers. Received: "
+                + Arrays.toString(importantHeaders));
+
+        System.out.println(Arrays.toString(importantHeaders));
+        int secChUaHeadersCount = 0;
+        for(String h: importantHeaders){
+            if(h.toLowerCase().startsWith("sec")) {
+                secChUaHeadersCount++;
+            }
+        }
+        assertTrue(secChUaHeadersCount >= 5);
+        cachedClient.destroyConnection();
+    }
+
 
 
     static List<Callable<Boolean>> createLookupTasks(int numTasks, final WmClient client) {
@@ -829,7 +875,7 @@ public class WmClientTest {
     private HttpServletRequest createTestRequest(final boolean provideHeaders) {
         return new HttpServletRequest() {
 
-            private Map<String, String> headers = new HashMap<>();
+            private final Map<String, String> headers = new HashMap<>();
             private String ua = "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
             private String xucbr = "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
             private String dstkUa = "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
