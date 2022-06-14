@@ -6,7 +6,7 @@ Apache commons-io
 Apache Software License Version 2.0
 http://www.apache.org/licenses/LICENSE-2.0
 
-Apache commons-lang
+Apache commons-lang3
 Apache Software License Version 2.0
 http://www.apache.org/licenses/LICENSE-2.0
 

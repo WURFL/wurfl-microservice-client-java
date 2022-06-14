@@ -24,17 +24,20 @@ import java.util.Map;
  */
 public class Model {
 
+    private Model(){}
+    static Model m = new Model();
+
     // Factory methods
     static Request newRequest(Map<String, String> lookupHeaders, String[] requestedCaps, String[] requestedVcaps, String wurflId) {
-        return new Model().new Request(lookupHeaders, requestedCaps, requestedVcaps, wurflId);
+        return m.new Request(lookupHeaders, requestedCaps, requestedVcaps, wurflId);
     }
 
     static JSONModelMktName newJSONModelMktName(String modelName, String mktName){
-        return new Model().new JSONModelMktName(modelName, mktName);
+        return m.new JSONModelMktName(modelName, mktName);
     }
 
     /**
-     * Holds informations about wurfl microservice server and API
+     * Holds information about wurfl microservice server and API
      * <p>
      * Created by Andrea Castello on 19/07/2017.
      */
