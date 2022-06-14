@@ -18,7 +18,9 @@ package com.scientiamobile.wurfl.wmclient;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections.iterators.EmptyIterator;
 import org.apache.commons.collections.iterators.IteratorEnumeration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -50,6 +52,7 @@ public class WmClientTest {
 
     @BeforeClass
     public void createTestClient() throws WmException {
+        System.out.println("Running on Java version: " + SystemUtils.JAVA_VERSION);
         String host = "localhost";
         String port = "8080";
         String envHost = System.getenv("WM_HOST");
@@ -62,6 +65,12 @@ public class WmClientTest {
         }
         _client = WmClient.create("http", host, port, "");
 
+    }
+
+    @Test
+    public void javaVersionTest(){
+        boolean isJava8min = SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_1_8);
+        assertTrue(isJava8min, "Java 8 is the minimum version required to run WMClient and its tests");
     }
 
 
@@ -173,7 +182,6 @@ public class WmClientTest {
 
     @Test
     public void testLookupUseragentNullUa() {
-        boolean exc = false;
         try {
             Model.JSONDeviceData device = _client.lookupUseragent(null);
             assertNotNull(device);
@@ -754,6 +762,7 @@ public class WmClientTest {
 
     @Test
     public void realCacheUsageTest_2() throws WmException {
+
         String host = "localhost";
         String port = "8080";
         String envHost = System.getenv("WM_HOST");
@@ -765,13 +774,20 @@ public class WmClientTest {
             port = envPort;
         }
         WmClient client = WmClient.create("http", host, port, "");
+
+        // We create a set of 10K elements
+        List<String> testUserAgents = new ArrayList<>();
+        for(int i=0; i<100;i++){
+            testUserAgents.addAll(Arrays.asList(TestData.USER_AGENTS));
+        }
+
         try {
             long start = System.nanoTime();
-            for (String ua: TestData.USER_AGENTS){
+            for (String ua: testUserAgents){
                 client.lookupUseragent(ua);
             }
             long elapsedNoCache = System.nanoTime() - start;
-            double avgNoCache = (double)elapsedNoCache/(double)TestData.USER_AGENTS.length;
+            double avgNoCache = (double)elapsedNoCache/(double)testUserAgents.size();
 
             // Now, let's add a cache layer
             client.setCacheSize(100000);
@@ -783,14 +799,14 @@ public class WmClientTest {
 
             // now use it
             long nu_start = System.nanoTime();
-            for (String ua: TestData.USER_AGENTS){
+            for (String ua: testUserAgents){
                 client.lookupUseragent(ua);
             }
             long elapsedWithCache = System.nanoTime() - nu_start;
-            double avgWithCache = (double)elapsedWithCache/(double)TestData.USER_AGENTS.length;
+            double avgWithCache = (double)elapsedWithCache/(double)testUserAgents.size();
 
             // Cache must be at least an order of magnitude faster
-            assertTrue(avgNoCache > avgWithCache * 10);
+            assertTrue(avgNoCache > avgWithCache * 100);
 
         }
         finally {
@@ -865,7 +881,7 @@ public class WmClientTest {
     // Uses reflection to force invoke of private method clearCacheIfNeeded for testing purposes
     private void invokeClearCacheIfNeeded(WmClient client, String ltime) throws ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, IllegalAccessException {
-        Class clientClass = Class.forName("com.scientiamobile.wurfl.wmclient.WmClient");
+        Class<?> clientClass = Class.forName("com.scientiamobile.wurfl.wmclient.WmClient");
         Method ms = clientClass.getDeclaredMethod("clearCachesIfNeeded", String.class);
         ms.setAccessible(true);
         ms.invoke(client, ltime);
@@ -876,9 +892,9 @@ public class WmClientTest {
         return new HttpServletRequest() {
 
             private final Map<String, String> headers = new HashMap<>();
-            private String ua = "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
-            private String xucbr = "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
-            private String dstkUa = "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
+            private final String ua = "Mozilla/5.0 (Nintendo Switch; WebApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
+            private final String xucbr = "Mozilla/5.0 (Nintendo Switch; ShareApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
+            private final String dstkUa = "Mozilla/5.0 (Nintendo Switch; WifiWebAuthApplet) AppleWebKit/601.6 (KHTML, like Gecko) NF/4.0.0.5.9 NintendoBrowser/5.1.0.13341";
 
 
             @Override

@@ -28,7 +28,7 @@ class LRUCache<K, E> {
     // We'll use this object to lock
     private final Object mutex;
 
-    private int size;
+    private final int size;
 
     private final ConcurrentHashMap<K, Node> cache;
     private Node head;

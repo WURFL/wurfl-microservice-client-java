@@ -18,8 +18,8 @@ package com.scientiamobile.wurfl.wmclient;
 import com.google.gson.Gson;
 import com.scientiamobile.wurfl.wmclient.Model.Request;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -591,7 +591,7 @@ public class WmClient {
      * @return This client API version
      */
     public String getApiVersion() {
-        return "2.1.5";
+        return "2.1.6";
     }
 
     private void clearCaches() {
@@ -623,20 +623,22 @@ public class WmClient {
     }
 
     private String getUserAgentCacheKey(Map<String, String> headers, String cacheType) throws WmException {
-        String key = "";
+        StringBuilder key = new StringBuilder("");
 
         if (headers == null && USERAGENT_CACHE_TYPE.equals(cacheType)) {
             throw new WmException("No User-Agent provided");
         }
 
         // Using important headers array preserves header name order
-        for (String h : importantHeaders) {
-            String hval = headers.get(h);
-            if (hval != null) {
-                key += hval;
+        if(headers!=null) {
+            for (String h : importantHeaders) {
+                String headerValue = headers.get(h);
+                if (headerValue != null) {
+                    key.append(headerValue);
+                }
             }
         }
-        return key;
+        return key.toString();
     }
 
     private void safePutDevice(LRUCache<String, Model.JSONDeviceData> cache, String key, Model.JSONDeviceData device) {
@@ -662,7 +664,7 @@ public class WmClient {
 
 class WmDataHandler<T> implements ResponseHandler<T> {
 
-    private Class<T> type;
+    private final Class<T> type;
 
     WmDataHandler(Class<T> type) {
         this.type = type;
