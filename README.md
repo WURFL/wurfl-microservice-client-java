@@ -243,7 +243,7 @@ Wurfl microservice client java only depends on the servlet API, which must be mo
     </dependencies>
 ```
 
-Please note that your application may need more dependencies to be updated in order to make it compliant with Jakarta EE 9 on Tomcat 10 (for example JSP and JSTç dependencies).
+Please note that your application may need more dependencies to be updated in order to make it compliant with Jakarta EE 9 on Tomcat 10 (for example JSP and JSTL dependencies).
 
 - JDK 16
 - Maven 3.8.1
@@ -254,3 +254,12 @@ If you are migrating your custom project to Jakarta EE9, the project build may f
 
 ### Migrating an already compiled wurfl-microservice-client-java jar file.
 There may be cases in which you don't want or cannot rebuild the client or the application from the source code. In that case you can use a tool called [Eclipse Transformer](https://github.com/eclipse/transformer/blob/main/README.md) which can be executed on the wurfl-microservice-client-java JAR file and return an output JAR file in which the bytecode is made compliant with the new namespace **jakarta.***
+
+## Code coverage report
+
+In order to generate the code coverage report, you must have a running version of WURFL Microservice Server.
+Code coverage report can be found under `target/site/jacoco/index.html`
+
+```bash
+mvn clean verify -Pcoverage
+```
