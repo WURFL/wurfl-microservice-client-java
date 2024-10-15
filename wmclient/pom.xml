@@ -213,6 +213,7 @@
                                     <excludes>
                                         <exclude>sun/**</exclude>
                                         <exclude>java/**</exclude>
+                                        <exclude>org/**</exclude>
                                     </excludes>
                                 </configuration>
                             </execution>
