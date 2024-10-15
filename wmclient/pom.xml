@@ -214,6 +214,7 @@
                                         <exclude>sun/**</exclude>
                                         <exclude>java/**</exclude>
                                         <exclude>org/**</exclude>
+                                        <exclude>com/sun/**</exclude>
                                     </excludes>
                                 </configuration>
                             </execution>
