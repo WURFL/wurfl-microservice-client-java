@@ -18,11 +18,33 @@ Minimum Java version compatibility table
 
 |   | Min. Java version | WM client version(s) |
 |---|--------------|----------------------|
-|   |       8      | 2.1.3                |
+|   |       8      | 2.1.3 and above      |
 |   |       7      | 2.1.0                |
 |   |       6      | 2.0.0                |
 
 Version 2.1.2 (Java 7) and 2.1.3 (Java 8) only differ in their dependencies (see CHANGELOG)
+
+### Compiling the client and the example project
+
+```
+mvn clean install
+```
+run on the wmclient directory, compiles the client and installs it in your local maven repository. The command also
+runs the unit tests against a running instance of the WURFL Microservice server. Tests fails if no server is running.
+
+** Note that from version 2.1.7, client artifact produced by mvn commands have their name aligned with the maven artifact
+naming, changing from wm-client-java-x.y.z.jar to wurfl-microservice-x.y.z.jar.
+
+To compile the example project, move to the example directory and run:
+
+```
+mvn clean compile package
+```
+
+to generate an executable jar file with all the needed dependencies.
+You need to compile the client first, because the example project depends on the it.
+
+In order to work, the example project needs a running instance of the WURFL Microservice server to connect to.
 
 The Example project contains an example of client api usage for a console application :
 
@@ -232,4 +254,3 @@ If you are migrating your custom project to Jakarta EE9, the project build may f
 
 ### Migrating an already compiled wurfl-microservice-client-java jar file.
 There may be cases in which you don't want or cannot rebuild the client or the application from the source code. In that case you can use a tool called [Eclipse Transformer](https://github.com/eclipse/transformer/blob/main/README.md) which can be executed on the wurfl-microservice-client-java JAR file and return an output JAR file in which the bytecode is made compliant with the new namespace **jakarta.***
-
