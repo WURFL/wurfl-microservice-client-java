@@ -190,7 +190,44 @@
                     </includes>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <!-- JaCoCo plugin for code coverage -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.8</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal> <!-- Prepares the JaCoCo agent -->
+                                </goals>
+                                <configuration>
+                                    <!-- Exclude JDK classes from being instrumented -->
+                                    <excludes>
+                                        <exclude>sun/**</exclude>
+                                        <exclude>java/**</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal> <!-- Generates the code coverage report -->
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
