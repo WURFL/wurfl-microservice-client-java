@@ -1,3 +1,17 @@
+/**
+ * Copyright 2018 Scientiamobile Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
 Copyright 2019 ScientiaMobile Inc. http://www.scientiamobile.com
 
@@ -17,7 +31,7 @@ package com.scientiamobile.wurfl.wmclient;
 
 import com.google.gson.Gson;
 import com.scientiamobile.wurfl.wmclient.Model.Request;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -171,6 +185,7 @@ public class WmClient {
     }
 
     /**
+     * Gets information about the WURFL microservice server.
      * @return A JSONInfoData instance holding the capabilities exposed from WM server, the headers used for device detection, WURFL file and API version
      * @throws WmException If server cannot send data or incomplete data are sent
      */
@@ -191,7 +206,8 @@ public class WmClient {
     }
 
     /**
-     * @return GetAllDeviceMakes returns a string array of all devices brand_name capabilities in WM server
+     * GetAllDeviceMakes returns a string array of all devices brand_name capabilities in WM server
+     * @return a string array of all devices brand_name capabilities in WM server
      * @throws WmException In case a connection error occurs or malformed data are sent
      */
     public String[] getAllDeviceMakes() throws WmException {
@@ -201,6 +217,8 @@ public class WmClient {
     }
 
     /**
+     * Gets all the devices model and marketing names for the given make (brand name).
+     *
      * @param make a brand name
      * @return An array of {@link com.scientiamobile.wurfl.wmclient.Model.JSONModelMktName} that contain values for model_name
      * and marketing_name (the latter, if available).
@@ -220,7 +238,8 @@ public class WmClient {
     }
 
     /**
-     * @return an array of all devices device_os capabilities in WM server
+     * Returns an array of all devices device OS names in WURFL Microservice server
+     * @return an array of all devices device_os capabilities in WURFL Microservice server
      * @throws WmException In case a connection error occurs or malformed data are sent
      */
     public String[] getAllOSes() throws WmException {
@@ -398,6 +417,10 @@ public class WmClient {
         return device;
     }
 
+    /**
+     * Sets the list of static capabilities to be returned from a device detection
+     * @param capsList a list of static capabilities to be returned from device detection
+     */
     public void setRequestedStaticCapabilities(String[] capsList) {
 
         if (capsList == null) {
@@ -416,6 +439,10 @@ public class WmClient {
         clearCaches();
     }
 
+    /**
+     * Sets the list of virtual capabilities to be returned from a device detection
+     * @param vcapsList a list of virtual capabilities to be returned from device detection
+     */
     public void setRequestedVirtualCapabilities(String[] vcapsList) {
 
         if (vcapsList == null) {
@@ -435,6 +462,7 @@ public class WmClient {
     }
 
     /**
+     * Says if this client handles the given static capability
      * @param capName capability name
      * @return true if the given static capability is handled by this client, false otherwise
      */
@@ -443,6 +471,7 @@ public class WmClient {
     }
 
     /**
+     * Says if this client handles the given virtual capability
      * @param capName capability name
      * @return true if the given virtual capability is handled by this client, false otherwise
      */
@@ -588,10 +617,11 @@ public class WmClient {
     }
 
     /**
+     * Returns This client API version
      * @return This client API version
      */
     public String getApiVersion() {
-        return "2.1.6";
+        return "2.1.7";
     }
 
     private void clearCaches() {
@@ -647,6 +677,11 @@ public class WmClient {
         }
     }
 
+    /**
+     * Returns the current cache sizes. Cache sizes are returned in an array of two elements, the first element containing the
+     * size of the device ID cache and the second element containing the size of the user agent cache.
+     * @return a two elements array with the cache sizes
+     */
     public int[] getActualCacheSizes() {
         int[] csize = new int[2];
 

@@ -6,19 +6,13 @@
 
     <groupId>com.scientiamobile.wurfl</groupId>
     <artifactId>wmclient-example</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.7</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <repositories>
-        <!--
-        <repository>
-            <id>tc</id>
-            <url>${env.M2_LOCAL_REPO}</url>
-        </repository>
-        -->
         <repository>
             <id>central</id>
             <url>https://repo1.maven.org/maven2</url>
@@ -48,7 +42,7 @@
         <dependency>
             <groupId>com.scientiamobile.wurflmicroservice</groupId>
             <artifactId>wurfl-microservice</artifactId>
-            <version>2.1.6</version>
+            <version>2.1.7</version>
         </dependency>
 
     </dependencies>

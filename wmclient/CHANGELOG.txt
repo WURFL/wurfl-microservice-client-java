@@ -1,3 +1,9 @@
+2.1.7
+-------------------------------------
+IMPORTANT: dependency commons-collections has been replaced with commons-collections4 (v4.4) to fix known vulnerability
+- Maven project renewal: artifact produced by the Maven build have a naming consistent with the Maven Central artifacts naming
+(wurfl-microservice-x.y.z.jar)
+
 2.1.6
 -------------------------------------
 IMPORTANT: dependency commons-lang (v2.6) has been replaced with commons-lang3 (v3.12.0).
