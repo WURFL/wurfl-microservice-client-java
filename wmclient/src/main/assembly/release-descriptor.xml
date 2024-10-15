@@ -32,5 +32,14 @@
             </includes>
             <outputDirectory>/</outputDirectory>
         </fileSet>
+        <fileSet>
+            <useDefaultExcludes>true</useDefaultExcludes>
+            <includes>
+                <!-- license -->
+                <include>LICENSE*</include>
+                <!-- third party license -->
+                <include>FOSS_THIRD_PARTY_LICENSES*</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>
