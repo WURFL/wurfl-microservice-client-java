@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <!-- Your artifact -->
     <groupId>com.scientiamobile.wurflmicroservice</groupId>
     <artifactId>wurfl-microservice</artifactId>
-    <version>2.1.6</version>
+    <version>2.1.7</version>
     <packaging>jar</packaging>
 
     <name>wurfl-microservice</name>
@@ -44,7 +46,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.9.0</version>
+            <version>2.9.1</version>
         </dependency>
 
 
@@ -58,13 +60,13 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
+            <version>4.5.14</version>
         </dependency>
         <!-- Apache Commons Collections -->
         <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.2</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.4</version>
         </dependency>
         <!-- Apache Commons Lang -->
         <dependency>
@@ -76,369 +78,153 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
+            <version>2.14.0</version>
         </dependency>
 
         <!-- TEST dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.21</version>
+            <version>7.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
-    <!-- Build -->
     <build>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.mycila.maven-license-plugin</groupId>
-                    <artifactId>maven-license-plugin</artifactId>
-                    <version>1.9.0</version>
-                    <configuration>
-                        <header>src/main/etc/header.txt</header>
-                        <properties>
-                            <years>${project.inceptionYear}</years>
-                            <organization.name>${project.organization.name}</organization.name>
-                            <organization.url>${project.organization.url}</organization.url>
-                            <organization.email>support@scientiamobile.com</organization.email>
-                        </properties>
-                        <mapping>
-                            <yml>SCRIPT_STYLE</yml>
-                            <mdxml>XML_STYLE</mdxml>
-                        </mapping>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                    <outputFileName>wm-client-java</outputFileName>
+                    <source>1.8</source>  <!-- Java 8 as the source version -->
+                    <target>1.8</target>  <!-- Java 8 as the target version -->
                 </configuration>
             </plugin>
 
+            <!-- Plugin to create the main JAR file -->
             <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.2</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.9</version>
-                <configuration>
-
-                    <systemPropertyVariables>
-                        <wurflapiversion>${project.version}</wurflapiversion>
-                        <buildDirectory>${project.build.directory}</buildDirectory>
-                    </systemPropertyVariables>
-
-                    <argLine>-Xmx4096m -Dwm.client.version=${project.version} -XX:MaxPermSize=512m</argLine>
-                    <properties>
-                        <property>
-                            <name>usedefaultlisteners</name>
-                            <key>false</key>
-                        </property>
-                    </properties>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
+                    <finalName>wurfl-microservice-${project.version}</finalName>
                 </configuration>
             </plugin>
+
+            <!-- Plugin to create the source JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Plugin to create the Javadoc JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <additionalJOptions>
+                        <arg>-Xdoclint:all,-missing,-html</arg>  <!-- Suppresses "missing" and "html" warnings -->
+                    </additionalJOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Plugin to create a ZIP file containing JAR, sources, and Javadocs -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/release-descriptor.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Plugin for checking and adding license headers -->
             <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
+                <version>1.9.0</version>
+                <configuration>
+                    <header>src/main/etc/header.txt</header>
+                    <properties>
+                        <years>${project.inceptionYear}</years>
+                        <organization.name>${project.organization.name}</organization.name>
+                        <organization.url>${project.organization.url}</organization.url>
+                        <organization.email>support@scientiamobile.com</organization.email>
+                    </properties>
+                    <mapping>
+                        <yml>SCRIPT_STYLE</yml>
+                        <mdxml>XML_STYLE</mdxml>
+                    </mapping>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                </configuration>
             </plugin>
 
         </plugins>
     </build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <finalName>wm-client-java</finalName>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
-
     <profiles>
-
         <profile>
             <id>coverage</id>
             <build>
                 <plugins>
-
+                    <!-- JaCoCo plugin for code coverage -->
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.7.5.201505241946</version>
+                        <version>0.8.8</version>
                         <executions>
                             <execution>
-                                <id>default-prepare-agent</id>
                                 <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>default-report</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>default-check</id>
-                                <goals>
-                                    <goal>check</goal>
+                                    <goal>prepare-agent</goal> <!-- Prepares the JaCoCo agent -->
                                 </goals>
                                 <configuration>
-                                    <rules>
-                                        <!-- implementation is needed only for Maven 2 -->
-                                        <rule implementation="org.jacoco.maven.RuleConfiguration">
-                                            <element>BUNDLE</element>
-                                            <limits>
-                                                <!-- implementation is needed only for Maven 2 -->
-                                                <limit implementation="org.jacoco.report.check.Limit">
-                                                    <counter>COMPLEXITY</counter>
-                                                    <value>COVEREDRATIO</value>
-                                                    <minimum>0.01</minimum>
-                                                </limit>
-                                            </limits>
-                                        </rule>
-                                    </rules>
+                                    <!-- Exclude JDK classes from being instrumented -->
+                                    <excludes>
+                                        <exclude>sun/**</exclude>
+                                        <exclude>java/**</exclude>
+                                        <exclude>org/**</exclude>
+                                        <exclude>com/sun/**</exclude>
+                                    </excludes>
                                 </configuration>
                             </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.16</version>
-                        <configuration>
-                            <!-- generate report even if CUT tests are failing -->
-                            <testFailureIgnore>true</testFailureIgnore>
-                            <argLine>${argLine}</argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>
-                                    src/main/assembly/release-descriptor.xml
-                                </descriptor>
-                            </descriptors>
-                            <finalName>wm-client-java</finalName>
-                        </configuration>
-                        <executions>
                             <execution>
-                                <id>dependencies-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <configuration>
-                                    <finalName>wm-client-java</finalName>
-                                </configuration>
-
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <finalName>wm-client-java</finalName>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <!--<groupId>org.apache.maven.plugins</groupId> -->
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                <configuration>
-                                    <finalName>wm-client-java</finalName>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <finalName>wm-client-java</finalName>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>2.3.2</version>
-                        <configuration>
-                            <finalName>wm-client-java</finalName>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
+                                <id>report</id>
                                 <phase>verify</phase>
                                 <goals>
-                                    <goal>sign</goal>
+                                    <goal>report</goal> <!-- Generates the code coverage report -->
                                 </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <gpgArguments>
-                                <arg>--pinentry-mode</arg>
-                                <arg>loopback</arg>
-                            </gpgArguments>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>release-with-libs</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>
-                                    src/main/assembly/package-libs.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>dependencies-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>source</id>
-            <build>
-                <plugins>
-
-                    <!-- check for license header in all (but excluded) files -->
-                    <plugin>
-                        <groupId>com.mycila.maven-license-plugin</groupId>
-                        <artifactId>maven-license-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>
-                                    src/main/assembly/source-descriptor.xml
-                                </descriptor>
-                            </descriptors>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>eula-assembly</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>javadocs</id>
-            <build>
-                <plugins>
-
-                    <plugin>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                <configuration>
-                                    <finalName>wm-client-java</finalName>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -446,19 +232,5 @@
             </build>
         </profile>
     </profiles>
+
 </project>
-
-        <!--
-                Copyright (c) ScientiaMobile, Inc.
-                Licensed under the Apache License, Version 2.0 (the "License");
-                you may not use this file except in compliance with the License.
-                You may obtain a copy of the License at
-
-                http://www.apache.org/licenses/LICENSE-2.0
-
-                Unless required by applicable law or agreed to in writing, software
-                distributed under the License is distributed on an "AS IS" BASIS,
-                WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                See the License for the specific language governing permissions and
-                limitations under the License.
-         -->

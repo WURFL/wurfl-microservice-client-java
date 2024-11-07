@@ -1,3 +1,17 @@
+/**
+ * Copyright 2018 Scientiamobile Inc.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /*
 Copyright 2019 ScientiaMobile Inc. http://www.scientiamobile.com
 
@@ -33,7 +47,7 @@ public class Model {
     }
 
     static JSONModelMktName newJSONModelMktName(String modelName, String mktName){
-        return m.new JSONModelMktName(modelName, mktName);
+        return new JSONModelMktName(modelName, mktName);
     }
 
     /**
@@ -43,12 +57,15 @@ public class Model {
      */
     public class JSONInfoData {
 
+        /** WURFL API version used by the wm server */
         @SerializedName("wurfl_api_version")
         String wurflApiVersion;
 
+        /** WURFL Microservice version used by the wm server */
         @SerializedName("wm_version")
         String wmVersion;
 
+        /** WURFL other WURFL information */
         @SerializedName("wurfl_info")
         String wurflInfo;
 
@@ -112,9 +129,15 @@ public class Model {
      */
     public class JSONDeviceData {
 
+        /**
+         * Device capabilities mapped as capability name,capability value
+         */
         @SerializedName("capabilities")
         public Map<String, String> capabilities;
 
+        /**
+         * Error message
+         */
         @SerializedName("error")
         public String error;
 
@@ -124,6 +147,11 @@ public class Model {
         @SerializedName("ltime")
         public String ltime;
 
+        /**
+         * Creates a new JSONDeviceData object
+         * @param capabilities a map of device capabilities mapped as capability name,capability value
+         * @param error an error message
+         */
         public JSONDeviceData(Map<String, String> capabilities, String error, int mtime) {
 
 
@@ -183,35 +211,56 @@ public class Model {
         }
     }
 
+    /**
+     * Holds data about a device make and model
+     */
     public class JSONMakeModel {
 
+        /** Brand name */
         @SerializedName("brand_name")
         public String brandName;
 
+        /** Model name */
         @SerializedName("model_name")
         public String modelName;
 
+        /** Marketing name (if available) */
         @SerializedName("marketing_name")
         public String marketingName;
     }
 
-    public class JSONModelMktName {
+    /**
+     * Holds data about a device model and marketing name
+     */
+    public static class JSONModelMktName {
+        /** Model name */
         @SerializedName("model_name")
         public String modelName;
 
+        /** Marketing name (if available) */
         @SerializedName("marketing_name")
         public String marketingName;
 
+        /**
+         * Creates a new JSONModelMktName object using the given model name and marketing name
+         * @param modelName a device model name
+         * @param marketingName a device marketing name
+         */
         public JSONModelMktName(String modelName, String marketingName) {
             this.modelName = modelName;
             this.marketingName = marketingName;
         }
     }
 
+    /**
+     * Holds data about a device os name and version
+     */
     public  class JSONDeviceOsVersions {
+        /** The device OS name */
         @SerializedName("device_os")
         public String osName;
 
+        /** The device OS version */
         @SerializedName("device_os_version")
         public String osVersion;
     }
