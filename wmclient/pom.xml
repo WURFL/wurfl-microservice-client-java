@@ -152,11 +152,11 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
+                    <classifier>javadoc</classifier>
                     <additionalJOptions>
                         <arg>-Xdoclint:all,-missing,-html</arg>  <!-- Suppresses "missing" and "html" warnings -->
                     </additionalJOptions>
                 </configuration>
-                <classifier>javadoc</classifier>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
