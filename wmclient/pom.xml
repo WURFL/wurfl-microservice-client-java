@@ -156,6 +156,7 @@
                         <arg>-Xdoclint:all,-missing,-html</arg>  <!-- Suppresses "missing" and "html" warnings -->
                     </additionalJOptions>
                 </configuration>
+                <classifier>javadoc</classifier>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
