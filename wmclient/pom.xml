@@ -106,6 +106,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
+                    <generateSources>false</generateSources>
+                    <generateJavadoc>false</generateJavadoc>
                 </configuration>
             </plugin>
             <plugin>
