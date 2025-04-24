@@ -132,12 +132,21 @@
 
             <!-- Plugin to create the source JAR -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.3.1</version>
                 <executions>
+                    <!-- Override any default execution (like "default") to prevent duplication -->
+                    <execution>
+                        <id>default</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                    <!-- Actual attach-sources execution -->
                     <execution>
                         <id>attach-sources</id>
+                        <phase>verify</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -147,6 +156,7 @@
                     </execution>
                 </executions>
             </plugin>
+
 
             <!-- Plugin to create the Javadoc JAR -->
             <plugin>
