@@ -14,6 +14,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <scm>
+        <connection>scm:git:git://github.com/WURFL/wurfl-microservice-client-java.git</connection>
+        <developerConnection>scm:git:ssh://github.com:WURFL/wurfl-microservice-client-java.git</developerConnection>
+        <url>https://github.com/WURFL/wurfl-microservice-client-java/tree/master</url>
+    </scm>
+
 
     <name>wurfl-microservice</name>
     <url>https://github.com/WURFL/wurfl-microservice-client-java</url>
