@@ -18,10 +18,12 @@ Minimum Java version compatibility table
 
 |   | Min. Java version | WM client version(s) |
 |---|--------------|----------------------|
-|   |       8      | 2.1.3 and above      |
+|   |       11     | 2.1.8 and above      |
+|   |       8      | 2.1.3                |
 |   |       7      | 2.1.0                |
 |   |       6      | 2.0.0                |
 
+Version 2.1.7 (Java 8) and 2.1.3 (Java 11) only differ in their dependencies and Maven Central deployment (see CHANGELOG)
 Version 2.1.2 (Java 7) and 2.1.3 (Java 8) only differ in their dependencies (see CHANGELOG)
 
 ### Compiling the client and the example project

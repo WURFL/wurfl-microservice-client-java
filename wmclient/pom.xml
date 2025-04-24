@@ -6,8 +6,20 @@
     <!-- Your artifact -->
     <groupId>com.scientiamobile.wurflmicroservice</groupId>
     <artifactId>wurfl-microservice</artifactId>
-    <version>2.1.7</version>
+    <version>2.1.8</version>
     <packaging>jar</packaging>
+
+    <properties>
+        <!-- tells plugins (compilers, resources, etc.) to use UTF-8 -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <scm>
+        <connection>scm:git:git://github.com/WURFL/wurfl-microservice-client-java.git</connection>
+        <developerConnection>scm:git:ssh://github.com:WURFL/wurfl-microservice-client-java.git</developerConnection>
+        <url>https://github.com/WURFL/wurfl-microservice-client-java/tree/master</url>
+    </scm>
+
 
     <name>wurfl-microservice</name>
     <url>https://github.com/WURFL/wurfl-microservice-client-java</url>
@@ -46,7 +58,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.9.1</version>
+            <version>2.10.1</version>
         </dependency>
 
 
@@ -54,7 +66,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-            <version>2.4</version>
+            <version>2.5</version>
         </dependency>
         <!-- Apache HttpClient -->
         <dependency>
@@ -72,13 +84,13 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>3.17.0</version>
         </dependency>
         <!-- Apache Commons IO -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.14.0</version>
+            <version>2.17.0</version>
         </dependency>
 
         <!-- TEST dependencies -->
@@ -92,14 +104,25 @@
 
     <build>
         <plugins>
-
+            <!-- plugin required for publishing to the new Maven Central Portal -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.7.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <generateSources>false</generateSources>
+                    <generateJavadoc>false</generateJavadoc>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <configuration>
-                    <source>1.8</source>  <!-- Java 8 as the source version -->
-                    <target>1.8</target>  <!-- Java 8 as the target version -->
+                    <!-- single flag that implies source, target, and system modules path -->
+                    <release>11</release>
                 </configuration>
             </plugin>
 
@@ -107,7 +130,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.4.1</version>
                 <configuration>
                     <finalName>wurfl-microservice-${project.version}</finalName>
                 </configuration>
@@ -115,18 +138,31 @@
 
             <!-- Plugin to create the source JAR -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.1</version>
                 <executions>
+                    <!-- Override any default execution (like "default") to prevent duplication -->
                     <execution>
-                        <id>attach-sources</id>
+                        <id>default</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
                     </execution>
+                    <!-- Actual attach-sources execution -->
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>sources</classifier>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
+
 
             <!-- Plugin to create the Javadoc JAR -->
             <plugin>
@@ -134,6 +170,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
+                    <classifier>javadoc</classifier>
                     <additionalJOptions>
                         <arg>-Xdoclint:all,-missing,-html</arg>  <!-- Suppresses "missing" and "html" warnings -->
                     </additionalJOptions>
@@ -152,7 +189,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.4.2</version>
+                <version>3.7.1</version>
                 <configuration>
                     <descriptors>
                         <descriptor>src/main/assembly/release-descriptor.xml</descriptor>
@@ -203,7 +240,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.8</version>
+                        <version>0.8.12</version>
                         <executions>
                             <execution>
                                 <goals>
