@@ -1,3 +1,7 @@
+2.1.9 - July 15, 2025
+-------------------------------------
+- Dependency updated org.apache.commons:commons-lang3 from 3.17.0 to 3.18.0 (fixes CVE-2025-48924)
+
 2.1.8
 -------------------------------------
 - Required Java minimum version is now 11
