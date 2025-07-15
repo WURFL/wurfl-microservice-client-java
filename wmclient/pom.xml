@@ -6,7 +6,7 @@
     <!-- Your artifact -->
     <groupId>com.scientiamobile.wurflmicroservice</groupId>
     <artifactId>wurfl-microservice</artifactId>
-    <version>2.1.8</version>
+    <version>2.1.9</version>
     <packaging>jar</packaging>
 
     <properties>
